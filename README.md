@@ -1,0 +1,2 @@
+# Introduction
+FeeShare is an Actively Validated Service (AVS) designed to incentivize smart contract developers on the Swellchain network by redistributing a portion of transaction fees their contracts generate. By leveraging EigenLayer's and Swellchain's infrastructure, FeeShare creates a decentralized reward mechanism that encourages active participation and innovation in the ecosystem.
