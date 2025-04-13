@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./StandardDAO.sol";
 import "./Treasury.sol";
-
 /**
  * @title DAOFactory
  * @author Your Name
@@ -38,15 +37,9 @@ contract DAOFactory is Ownable {
         address[] memory _initialWhitelistedTokens,
         address[] memory _initialWhitelistedFunders
     ) external onlyOwner {
-        // Create TreasuryContract
-        Treasury treasuryContract = new Treasury(
-            address(0), // Placeholder, DAO address is set later
-            _initialWhitelistedTokens,
-            _initialWhitelistedFunders
-        );
-
         // Create StandardDAO
         StandardDAO daoContract = new StandardDAO(
+            msg.sender,
             _daoName,
             _daoDescription,
             _daoXAccount,
@@ -56,9 +49,13 @@ contract DAOFactory is Ownable {
             _daoOnlyMembersCanPropose
         );
 
-        // Update TreasuryContract with the DAO address
-        treasuryContract.updateDaoContractAddress(address(daoContract));
-
+        // Create TreasuryContract
+        Treasury treasuryContract = new Treasury(
+            msg.sender,
+            address(daoContract), // Placeholder, DAO address is set later
+            _initialWhitelistedTokens,
+            _initialWhitelistedFunders
+        );
         emit DAOCreated(address(daoContract), address(treasuryContract));
     }
 }

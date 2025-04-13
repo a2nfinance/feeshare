@@ -30,15 +30,18 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
 
      /**
      * @dev Initializes the TreasuryContract.
+     * @param _creator The creator address.
      * @param _daoContractAddress The address of the DAO contract.
      * @param _initialWhitelistedTokens An array of initial whitelisted token addresses.
      * @param _initialWhitelistedFunders An array of initial whitelisted funder addresses.
      */
     constructor(
+        address _creator,
         address _daoContractAddress,
         address[] memory _initialWhitelistedTokens,
         address[] memory _initialWhitelistedFunders
-    ) Ownable(msg.sender) {
+    ) Ownable(_creator) {
+        require(_creator != address(0), "Creator address cannot be zero.");
         require(_daoContractAddress != address(0), "DAO address cannot be zero.");
         daoContractAddress = _daoContractAddress;
 

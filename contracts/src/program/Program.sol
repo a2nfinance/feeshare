@@ -29,8 +29,6 @@ contract Program is Ownable, IProgram {
     // Beneficiary Application: appId -> wallet address
     mapping(uint256 => address) public beneficiaryApp;
 
-
-
     /**
      * @dev Initializes the ProgramContract.
      * @param _daoAddress The address of the DAO contract.
@@ -56,9 +54,15 @@ contract Program is Ownable, IProgram {
     /**
      * @inheritdoc IProgram
      */
-    function updateRules(uint256 _newFixedRewardPercentage, Structs.Rule[] memory _newRewardRules) external onlyOwner {
+    function updateRules(
+        uint256 _newFixedRewardPercentage,
+        Structs.Rule[] memory _newRewardRules
+    ) external onlyOwner {
         fixedRewardPercentage = _newFixedRewardPercentage;
-        rewardRules = _newRewardRules;
+        delete rewardRules;
+        for (uint i = 0; i < _newRewardRules.length; i++) {
+            rewardRules.push(_newRewardRules[i]);
+        }
 
         emit RulesUpdated(_newFixedRewardPercentage);
     }
@@ -66,12 +70,21 @@ contract Program is Ownable, IProgram {
     /**
      * @inheritdoc IProgram
      */
-    function addWhitelistedAppContracts(uint256 _appId, address[] memory _contracts) external {
-        require(msg.sender == daoAddress, "Only the DAO address can call this function.");
+    function addWhitelistedAppContracts(
+        uint256 _appId,
+        address[] memory _contracts
+    ) external {
+        require(
+            msg.sender == daoAddress,
+            "Only the DAO address can call this function."
+        );
         require(_contracts.length > 0, "Contracts array cannot be empty.");
 
         for (uint256 i = 0; i < _contracts.length; i++) {
-            require(_contracts[i] != address(0), "Contract address cannot be zero.");
+            require(
+                _contracts[i] != address(0),
+                "Contract address cannot be zero."
+            );
             whitelistedAppContracts[_appId].push(_contracts[i]);
         }
 
@@ -82,7 +95,10 @@ contract Program is Ownable, IProgram {
      * @inheritdoc IProgram
      */
     function removeWhitelistedApp(uint256 _appId) external {
-        require(msg.sender == daoAddress, "Only the DAO address can call this function.");
+        require(
+            msg.sender == daoAddress,
+            "Only the DAO address can call this function."
+        );
 
         delete whitelistedAppContracts[_appId];
 
@@ -92,9 +108,18 @@ contract Program is Ownable, IProgram {
     /**
      * @inheritdoc IProgram
      */
-    function removeWhitelistedAppContract(uint256 _appId, address _contractAddress) external {
-        require(msg.sender == daoAddress, "Only the DAO address can call this function.");
-        require(_contractAddress != address(0), "Contract address cannot be zero.");
+    function removeWhitelistedAppContract(
+        uint256 _appId,
+        address _contractAddress
+    ) external {
+        require(
+            msg.sender == daoAddress,
+            "Only the DAO address can call this function."
+        );
+        require(
+            _contractAddress != address(0),
+            "Contract address cannot be zero."
+        );
 
         address[] storage contracts = whitelistedAppContracts[_appId];
         for (uint256 i = 0; i < contracts.length; i++) {
@@ -121,8 +146,14 @@ contract Program is Ownable, IProgram {
     /**
      * @inheritdoc IProgram
      */
-    function updateProgramDates(uint256 _newStartDate, uint256 _newEndDate) external onlyOwner {
-        require(_newStartDate < _newEndDate, "Start date must be before end date.");
+    function updateProgramDates(
+        uint256 _newStartDate,
+        uint256 _newEndDate
+    ) external onlyOwner {
+        require(
+            _newStartDate < _newEndDate,
+            "Start date must be before end date."
+        );
         startDate = _newStartDate;
         endDate = _newEndDate;
     }
@@ -130,15 +161,24 @@ contract Program is Ownable, IProgram {
     /**
      * @inheritdoc IProgram
      */
-    function setBeneficiaryApp(uint256 _appId, address _beneficiary) external onlyOwner {
-        require(_beneficiary != address(0), "Beneficiary address cannot be zero.");
+    function setBeneficiaryApp(
+        uint256 _appId,
+        address _beneficiary
+    ) external onlyOwner {
+        require(
+            _beneficiary != address(0),
+            "Beneficiary address cannot be zero."
+        );
         beneficiaryApp[_appId] = _beneficiary;
     }
 
     /**
      * @inheritdoc IProgram
      */
-    function isContractWhitelisted(uint256 _appId, address _contractAddress) public view returns (bool) {
+    function isContractWhitelisted(
+        uint256 _appId,
+        address _contractAddress
+    ) public view returns (bool) {
         address[] memory contracts = whitelistedAppContracts[_appId];
         for (uint256 i = 0; i < contracts.length; i++) {
             if (contracts[i] == _contractAddress) {

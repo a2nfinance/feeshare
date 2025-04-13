@@ -38,6 +38,7 @@ contract StandardDAO is Ownable, IStandardDAO {
     
     /**
      * @dev Initializes the DAO.
+     * @param _creator The creator address.
      * @param _name The name of the DAO.
      * @param _description A brief description of the DAO.
      * @param _xAccount The X (Twitter) account of the DAO.
@@ -47,6 +48,7 @@ contract StandardDAO is Ownable, IStandardDAO {
      * @param _onlyMembersCanPropose Flag indicating if only members can create proposals.
      */
     constructor(
+        address _creator,
         string memory _name,
         string memory _description,
         string memory _xAccount,
@@ -54,10 +56,10 @@ contract StandardDAO is Ownable, IStandardDAO {
         uint256 _quorum,
         uint256 _votingThreshold,
         bool _onlyMembersCanPropose
-    ) Ownable(msg.sender) {
+    ) Ownable(_creator) {
         name = _name;
         description = _description;
-        creator = msg.sender;
+        creator = _creator;
         xAccount = _xAccount;
         discordAccount = _discordAccount;
         quorum = _quorum;
