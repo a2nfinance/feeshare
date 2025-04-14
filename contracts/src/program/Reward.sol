@@ -27,10 +27,16 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
 
     /**
      * @dev Initializes the Reward contract.
+     * @param _owner The owner address.
      * @param _programContractAddress The address of the ProgramContract.
      * @param _avsSubmitContractAddress The address of the AVS Submit Contract.
      */
-    constructor(address _programContractAddress, address _avsSubmitContractAddress) Ownable(msg.sender) {
+    constructor(
+        address _owner,
+        address _programContractAddress, 
+        address _avsSubmitContractAddress
+    ) Ownable(_owner) {
+        require(_owner != address(0), "Owner address cannot be zero.");
         require(_programContractAddress != address(0), "Program contract address cannot be zero.");
         require(_avsSubmitContractAddress != address(0), "AVS Submit contract address cannot be zero.");
 

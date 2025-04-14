@@ -77,6 +77,12 @@ interface IStandardDAO {
      */
     function getMemberAtIndex(uint256 _index) external view returns (address);
 
+    /**
+     * @dev Returns the number of proposals in the DAO.
+     * @return The number of proposals.
+     */
+    function getProposalCount() external view returns (uint256);
+
     // Events
     event ProposalCreated(uint256 proposalId, string name, address proposer);
     event MemberAdded(address member, uint256 weight);

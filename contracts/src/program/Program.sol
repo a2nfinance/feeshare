@@ -31,17 +31,22 @@ contract Program is Ownable, IProgram {
 
     /**
      * @dev Initializes the ProgramContract.
+     * @param _owner The owner address.
      * @param _daoAddress The address of the DAO contract.
      * @param _startDate The start date of the program.
      * @param _endDate The end date of the program.
      * @param _fixedRewardPercentage The fixed reward percentage.
+     * @param _rewardRules The reward rules.
      */
     constructor(
+        address _owner,
         address _daoAddress,
         uint256 _startDate,
         uint256 _endDate,
-        uint256 _fixedRewardPercentage
-    ) Ownable(msg.sender) {
+        uint256 _fixedRewardPercentage,
+        Structs.Rule[] memory _rewardRules
+    ) Ownable(_owner) {
+        require(_owner != address(0), "Owner address cannot be zero.");
         require(_daoAddress != address(0), "DAO address cannot be zero.");
         require(_startDate < _endDate, "Start date must be before end date.");
 
@@ -49,6 +54,9 @@ contract Program is Ownable, IProgram {
         startDate = _startDate;
         endDate = _endDate;
         fixedRewardPercentage = _fixedRewardPercentage;
+        for (uint i = 0; i < _rewardRules.length; i++) {
+            rewardRules.push(_rewardRules[i]);
+        }
     }
 
     /**
@@ -186,5 +194,9 @@ contract Program is Ownable, IProgram {
             }
         }
         return false;
+    }
+
+    function getRewardRule(uint256 _index) public view returns (Structs.Rule memory) {
+        return rewardRules[_index];
     }
 }

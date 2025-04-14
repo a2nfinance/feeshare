@@ -29,6 +29,7 @@ contract DAOFactoryTest is Test {
         uint256 daoQuorum = 50;
         uint256 daoVotingThreshold = 60;
         bool daoOnlyMembersCanPropose = true;
+        bool daoAllowEarlierExecution = true;
         address[] memory initialWhitelistedTokens = new address[](1);
         initialWhitelistedTokens[0] = address(0x4);
         address[] memory initialWhitelistedFunders = new address[](1);
@@ -44,6 +45,7 @@ contract DAOFactoryTest is Test {
             daoQuorum,
             daoVotingThreshold,
             daoOnlyMembersCanPropose,
+            daoAllowEarlierExecution,
             initialWhitelistedTokens,
             initialWhitelistedFunders
         );
@@ -96,6 +98,7 @@ contract DAOFactoryTest is Test {
         uint256 daoQuorum = 50;
         uint256 daoVotingThreshold = 60;
         bool daoOnlyMembersCanPropose = true;
+        bool daoAllowEarlierExecution = true;
         address[] memory initialWhitelistedTokens = new address[](1);
         initialWhitelistedTokens[0] = address(0x4);
         address[] memory initialWhitelistedFunders = new address[](1);
@@ -111,6 +114,7 @@ contract DAOFactoryTest is Test {
             daoQuorum,
             daoVotingThreshold,
             daoOnlyMembersCanPropose,
+            daoAllowEarlierExecution,
             initialWhitelistedTokens,
             initialWhitelistedFunders
         );

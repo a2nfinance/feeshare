@@ -14,7 +14,7 @@ import "../interfaces/IStandardDAO.sol";
 contract StandardDAO is Ownable, IStandardDAO {
     using EnumerableSet for EnumerableSet.AddressSet;
     using Math for uint256;
-
+    uint256 public denominator = 10000;
     // General Info
     string public name;
     string public description;
@@ -33,6 +33,9 @@ contract StandardDAO is Ownable, IStandardDAO {
     // Proposal Permissions
     bool public onlyMembersCanPropose;
 
+    // Proposal execute mechanism
+    bool public allowEarlierExecution;
+
     Structs.Proposal[] public proposals;
     mapping(uint256 => mapping(address => bool)) public hasVoted;
     
@@ -46,6 +49,7 @@ contract StandardDAO is Ownable, IStandardDAO {
      * @param _quorum The initial quorum for voting.
      * @param _votingThreshold The initial voting threshold.
      * @param _onlyMembersCanPropose Flag indicating if only members can create proposals.
+     * @param _allowEarlierExecution Flag indicating if a proposal can be executed earlier.
      */
     constructor(
         address _creator,
@@ -55,7 +59,8 @@ contract StandardDAO is Ownable, IStandardDAO {
         string memory _discordAccount,
         uint256 _quorum,
         uint256 _votingThreshold,
-        bool _onlyMembersCanPropose
+        bool _onlyMembersCanPropose,
+        bool _allowEarlierExecution
     ) Ownable(_creator) {
         name = _name;
         description = _description;
@@ -65,6 +70,7 @@ contract StandardDAO is Ownable, IStandardDAO {
         quorum = _quorum;
         votingThreshold = _votingThreshold;
         onlyMembersCanPropose = _onlyMembersCanPropose;
+        allowEarlierExecution = _allowEarlierExecution;
     }
 
     /**
@@ -148,21 +154,28 @@ contract StandardDAO is Ownable, IStandardDAO {
     /**
      * @inheritdoc IStandardDAO
      */
-    function executeProposal(uint256 _proposalId) public onlyOwner {
+    function executeProposal(uint256 _proposalId) public {
+        require(isMember(msg.sender), "Only members can execute proposal.");
         require(_proposalId < proposals.length, "Invalid proposal ID.");
         require(proposals[_proposalId].status == Structs.Status.Open, "Proposal is not open.");
         require(!proposals[_proposalId].executed, "Proposal already executed.");
-        require(block.timestamp > proposals[_proposalId].endDate, "Voting period has not ended.");
-
+        if (!allowEarlierExecution) {
+            require(block.timestamp > proposals[_proposalId].endDate, "Voting period has not ended.");
+        }
+        
         uint256 totalVotes = 0;
         for (uint256 i = 0; i < members.length(); i++) {
-            totalVotes += memberWeight[members.at(i)];
+            if (hasVoted[_proposalId][members.at(i)]) {
+                totalVotes += 1;
+            }
+            
         }
 
         uint256 totalVotesFor = proposals[_proposalId].totalVotesFor;
+        uint256 totalVotesAgainst = proposals[_proposalId].totalVotesAgainst;
 
-        require(totalVotes >= quorum, "Quorum not reached.");
-        require(totalVotesFor > (totalVotes * votingThreshold) / 100, "Voting threshold not reached.");
+        require((totalVotes * denominator / members.length()) >= quorum, "Quorum not reached.");
+        require((totalVotesFor * denominator / (totalVotesFor + totalVotesAgainst)) >= votingThreshold, "Voting threshold not reached.");
 
         proposals[_proposalId].status = Structs.Status.Executed;
         proposals[_proposalId].executed = true;
@@ -209,4 +222,12 @@ contract StandardDAO is Ownable, IStandardDAO {
         require(_index < members.length(), "Index out of bounds.");
         return members.at(_index);
     }
+
+    /**
+     * @inheritdoc IStandardDAO
+     */
+    function getProposalCount() public view returns (uint256) {
+        return proposals.length;
+    }
+
 }

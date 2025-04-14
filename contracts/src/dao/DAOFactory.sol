@@ -23,6 +23,7 @@ contract DAOFactory is Ownable {
      * @param _daoQuorum The initial quorum for voting.
      * @param _daoVotingThreshold The initial voting threshold.
      * @param _daoOnlyMembersCanPropose Flag indicating if only members can create proposals.
+     * @param _daoAllowEarlierExecution Flag indicating if if a proposal can be executed earlier.
      * @param _initialWhitelistedTokens An array of initial whitelisted token addresses for the TreasuryContract.
      * @param _initialWhitelistedFunders An array of initial whitelisted funder addresses for the TreasuryContract.
      */
@@ -34,6 +35,7 @@ contract DAOFactory is Ownable {
         uint256 _daoQuorum,
         uint256 _daoVotingThreshold,
         bool _daoOnlyMembersCanPropose,
+        bool _daoAllowEarlierExecution,
         address[] memory _initialWhitelistedTokens,
         address[] memory _initialWhitelistedFunders
     ) external onlyOwner {
@@ -46,7 +48,8 @@ contract DAOFactory is Ownable {
             _daoDiscordAccount,
             _daoQuorum,
             _daoVotingThreshold,
-            _daoOnlyMembersCanPropose
+            _daoOnlyMembersCanPropose,
+            _daoAllowEarlierExecution
         );
 
         // Create TreasuryContract
