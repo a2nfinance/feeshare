@@ -70,7 +70,6 @@ contract DAOTest is Test {
 
         // 2. Encode the call data for ProgramFactory.createContracts
         bytes memory callData = abi.encodeWithSelector(
-            // "createContracts(address,uint256,uint256,uint256,Structs.Rule[],address)",
             IProgramFactory.createContracts.selector,
             daoAddress,
             startDate,

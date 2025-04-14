@@ -2,8 +2,6 @@
 pragma solidity ^0.8.20;
 
 interface ITreasury {
-
-
     // Events
     event FundAdded(address tokenAddress, address sender, uint256 amount);
     event WhitelistedTokenAdded(address tokenAddress);
@@ -11,7 +9,7 @@ interface ITreasury {
     event WhitelistedFunderAdded(address funderAddress);
     event WhitelistedFunderRemoved(address funderAddress);
     event FundSent(address tokenAddress, address to, uint256 amount);
-
+    event EmergencyWithdrawal(address withdrawnTo);
 
     /**
      * @dev Adds funds to the treasury. Only whitelisted accounts can add whitelisted tokens.
@@ -107,4 +105,13 @@ interface ITreasury {
      * @param _newDaoContractAddress The new address of the DAO contract.
      */
     function updateDaoContractAddress(address _newDaoContractAddress) external;
+
+
+    /**
+     * @dev Emergency function to withdraw all whitelisted tokens to a specified address.
+     *      This function is intended for emergency situations where the funds need to be quickly moved.
+     *      It can only be called by the contract owner.
+     * @param _withdrawnTo The address to send the tokens to.
+     */
+    function emergencyWithdrawal(address _withdrawnTo) external;
 }

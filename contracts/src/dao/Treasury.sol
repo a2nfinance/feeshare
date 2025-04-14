@@ -183,4 +183,39 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
         require(_newDaoContractAddress != address(0), "DAO address cannot be zero.");
         daoContractAddress = _newDaoContractAddress;
     }
+
+
+    modifier onlyDAO() {
+        require(msg.sender == daoContractAddress, "Not the DAO contract");
+        _;
+    }
+
+    /**
+     * @dev Emergency function to withdraw all whitelisted tokens to a specified address.
+     *      This function is intended for emergency situations where the funds need to be quickly moved.
+     *      It can only be called by the contract owner.
+     * @param _withdrawnTo The address to send the tokens to.
+     */
+    function emergencyWithdrawal(address _withdrawnTo) external onlyDAO nonReentrant {
+        require(_withdrawnTo != address(0), "Withdrawal address cannot be zero.");
+
+        uint256 tokenCount = whitelistedTokens.length();
+        for (uint256 i = 0; i < tokenCount; i++) {
+            address tokenAddress = whitelistedTokens.at(i);
+            IERC20 token = IERC20(tokenAddress);
+            uint256 balance = token.balanceOf(address(this));
+
+            if (balance > 0) {
+                require(token.transfer(_withdrawnTo, balance), "Emergency transfer failed.");
+            }
+        }
+
+        uint256 balance = address(this).balance;
+        if (balance > 0) {
+            _withdrawnTo.call{value: balance}("");
+        }
+
+        emit EmergencyWithdrawal(_withdrawnTo);
+        
+    }
 }
