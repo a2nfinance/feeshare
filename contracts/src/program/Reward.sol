@@ -107,4 +107,9 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
         require(_newAvsSubmitContractAddress != address(0), "AVS Submit contract address cannot be zero.");
         avsSubmitContractAddress = _newAvsSubmitContractAddress;
     }
+
+    receive() external payable {
+    }
+    fallback() external payable {
+    }
 }

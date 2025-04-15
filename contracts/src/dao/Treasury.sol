@@ -26,9 +26,7 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     // DAO Contract Address
     address public daoContractAddress;
 
-    
-
-     /**
+    /**
      * @dev Initializes the TreasuryContract.
      * @param _creator The creator address.
      * @param _daoContractAddress The address of the DAO contract.
@@ -42,18 +40,27 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
         address[] memory _initialWhitelistedFunders
     ) Ownable(_creator) {
         require(_creator != address(0), "Creator address cannot be zero.");
-        require(_daoContractAddress != address(0), "DAO address cannot be zero.");
+        require(
+            _daoContractAddress != address(0),
+            "DAO address cannot be zero."
+        );
         daoContractAddress = _daoContractAddress;
 
         // Add initial whitelisted tokens
         for (uint256 i = 0; i < _initialWhitelistedTokens.length; i++) {
-            require(_initialWhitelistedTokens[i] != address(0), "Token address cannot be zero.");
+            require(
+                _initialWhitelistedTokens[i] != address(0),
+                "Token address cannot be zero."
+            );
             whitelistedTokens.add(_initialWhitelistedTokens[i]);
         }
 
         // Add initial whitelisted funders
         for (uint256 i = 0; i < _initialWhitelistedFunders.length; i++) {
-            require(_initialWhitelistedFunders[i] != address(0), "Funder address cannot be zero.");
+            require(
+                _initialWhitelistedFunders[i] != address(0),
+                "Funder address cannot be zero."
+            );
             whitelistedFunders.add(_initialWhitelistedFunders[i]);
         }
     }
@@ -61,13 +68,22 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function addFund(address _tokenAddress, uint256 _amount) external nonReentrant {
-        require(isWhitelistedFunder(msg.sender), "Only whitelisted funders can add funds.");
+    function addFund(
+        address _tokenAddress,
+        uint256 _amount
+    ) external nonReentrant {
+        require(
+            isWhitelistedFunder(msg.sender),
+            "Only whitelisted funders can add funds."
+        );
         require(isWhitelistedToken(_tokenAddress), "Token is not whitelisted.");
         require(_amount > 0, "Amount must be greater than zero.");
 
         IERC20 token = IERC20(_tokenAddress);
-        require(token.transferFrom(msg.sender, address(this), _amount), "Transfer failed.");
+        require(
+            token.transferFrom(msg.sender, address(this), _amount),
+            "Transfer failed."
+        );
 
         emit FundAdded(_tokenAddress, msg.sender, _amount);
     }
@@ -77,7 +93,10 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
      */
     function addWhitelistedToken(address _tokenAddress) external onlyOwner {
         require(_tokenAddress != address(0), "Token address cannot be zero.");
-        require(!isWhitelistedToken(_tokenAddress), "Token already whitelisted.");
+        require(
+            !isWhitelistedToken(_tokenAddress),
+            "Token already whitelisted."
+        );
 
         whitelistedTokens.add(_tokenAddress);
 
@@ -100,7 +119,10 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
      */
     function addWhitelistedFunder(address _funderAddress) external onlyOwner {
         require(_funderAddress != address(0), "Funder address cannot be zero.");
-        require(!isWhitelistedFunder(_funderAddress), "Funder already whitelisted.");
+        require(
+            !isWhitelistedFunder(_funderAddress),
+            "Funder already whitelisted."
+        );
 
         whitelistedFunders.add(_funderAddress);
 
@@ -110,8 +132,13 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function removeWhitelistedFunder(address _funderAddress) external onlyOwner {
-        require(isWhitelistedFunder(_funderAddress), "Funder is not whitelisted.");
+    function removeWhitelistedFunder(
+        address _funderAddress
+    ) external onlyOwner {
+        require(
+            isWhitelistedFunder(_funderAddress),
+            "Funder is not whitelisted."
+        );
 
         whitelistedFunders.remove(_funderAddress);
 
@@ -121,13 +148,25 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function sendFund(address _tokenAddress, address _to, uint256 _amount) external nonReentrant {
-        require(msg.sender == daoContractAddress, "Only the DAO contract can call this function.");
+    function sendFund(
+        address _tokenAddress,
+        address _to,
+        uint256 _amount
+    ) external nonReentrant {
+        require(
+            msg.sender == daoContractAddress,
+            "Only the DAO contract can call this function."
+        );
+
         require(_to != address(0), "Recipient address cannot be zero.");
         require(_amount > 0, "Amount must be greater than zero.");
-
-        IERC20 token = IERC20(_tokenAddress);
-        require(token.transfer(_to, _amount), "Transfer failed.");
+        if (_tokenAddress == address(0)) {
+            (bool success, ) = payable(_to).call{value: _amount}("");
+            require(success, "Transfer failed.");
+        } else {
+            IERC20 token = IERC20(_tokenAddress);
+            require(token.transfer(_to, _amount), "Transfer failed.");
+        }
 
         emit FundSent(_tokenAddress, _to, _amount);
     }
@@ -135,14 +174,18 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function isWhitelistedToken(address _tokenAddress) public view returns (bool) {
+    function isWhitelistedToken(
+        address _tokenAddress
+    ) public view returns (bool) {
         return whitelistedTokens.contains(_tokenAddress);
     }
 
     /**
      * @inheritdoc ITreasury
      */
-    function isWhitelistedFunder(address _funderAddress) public view returns (bool) {
+    function isWhitelistedFunder(
+        address _funderAddress
+    ) public view returns (bool) {
         return whitelistedFunders.contains(_funderAddress);
     }
 
@@ -156,7 +199,9 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function getWhitelistedTokenAtIndex(uint256 _index) public view returns (address) {
+    function getWhitelistedTokenAtIndex(
+        uint256 _index
+    ) public view returns (address) {
         require(_index < whitelistedTokens.length(), "Index out of bounds.");
         return whitelistedTokens.at(_index);
     }
@@ -171,7 +216,9 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function getWhitelistedFunderAtIndex(uint256 _index) public view returns (address) {
+    function getWhitelistedFunderAtIndex(
+        uint256 _index
+    ) public view returns (address) {
         require(_index < whitelistedFunders.length(), "Index out of bounds.");
         return whitelistedFunders.at(_index);
     }
@@ -179,22 +226,31 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
     /**
      * @inheritdoc ITreasury
      */
-    function updateDaoContractAddress(address _newDaoContractAddress) external onlyOwner {
-        require(_newDaoContractAddress != address(0), "DAO address cannot be zero.");
+    function updateDaoContractAddress(
+        address _newDaoContractAddress
+    ) external onlyOwner {
+        require(
+            _newDaoContractAddress != address(0),
+            "DAO address cannot be zero."
+        );
         daoContractAddress = _newDaoContractAddress;
     }
-
 
     modifier onlyDAO() {
         require(msg.sender == daoContractAddress, "Not the DAO contract");
         _;
     }
 
-   /**
+    /**
      * @inheritdoc ITreasury
      */
-    function emergencyWithdrawal(address _withdrawnTo) external onlyDAO nonReentrant {
-        require(_withdrawnTo != address(0), "Withdrawal address cannot be zero.");
+    function emergencyWithdrawal(
+        address _withdrawnTo
+    ) external onlyDAO nonReentrant {
+        require(
+            _withdrawnTo != address(0),
+            "Withdrawal address cannot be zero."
+        );
         uint256 balance = 0;
         uint256 tokenCount = whitelistedTokens.length();
         for (uint256 i = 0; i < tokenCount; i++) {
@@ -203,7 +259,10 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
             balance = token.balanceOf(address(this));
 
             if (balance > 0) {
-                require(token.transfer(_withdrawnTo, balance), "Emergency transfer failed.");
+                require(
+                    token.transfer(_withdrawnTo, balance),
+                    "Emergency transfer failed."
+                );
             }
         }
 
@@ -214,6 +273,12 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
         }
 
         emit EmergencyWithdrawal(_withdrawnTo);
-        
+    }
+
+
+    receive() external payable {
+    }
+
+    fallback() external payable {
     }
 }
