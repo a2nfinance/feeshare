@@ -60,7 +60,8 @@ contract StandardDAO is Ownable, IStandardDAO {
         uint256 _quorum,
         uint256 _votingThreshold,
         bool _onlyMembersCanPropose,
-        bool _allowEarlierExecution
+        bool _allowEarlierExecution,
+        Structs.MemberWeight[] memory _memberWeightArr
     ) Ownable(_creator) {
         name = _name;
         description = _description;
@@ -71,6 +72,10 @@ contract StandardDAO is Ownable, IStandardDAO {
         votingThreshold = _votingThreshold;
         onlyMembersCanPropose = _onlyMembersCanPropose;
         allowEarlierExecution = _allowEarlierExecution;
+        for(uint256 i = 0; i < _memberWeightArr.length; i++) {
+            members.add(_memberWeightArr[i].memberAddress);
+            memberWeight[_memberWeightArr[i].memberAddress] = _memberWeightArr[i].weight;
+        }
     }
 
     /**

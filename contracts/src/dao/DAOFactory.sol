@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./StandardDAO.sol";
 import "./Treasury.sol";
 /**
@@ -9,11 +8,9 @@ import "./Treasury.sol";
  * @author Your Name
  * @notice This contract facilitates the creation of StandardDAO and TreasuryContract instances.
  */
-contract DAOFactory is Ownable {
+contract DAOFactory {
     // Events
     event DAOCreated(address daoContract, address treasuryContract);
-    
-    constructor() Ownable(msg.sender) {}
     /**
      * @dev Creates a new StandardDAO and TreasuryContract pair.
      * @param _daoName The name of the DAO.
@@ -37,8 +34,9 @@ contract DAOFactory is Ownable {
         bool _daoOnlyMembersCanPropose,
         bool _daoAllowEarlierExecution,
         address[] memory _initialWhitelistedTokens,
-        address[] memory _initialWhitelistedFunders
-    ) external onlyOwner {
+        address[] memory _initialWhitelistedFunders,
+        Structs.MemberWeight[] memory _memberWeightArr
+    ) external {
         // Create StandardDAO
         StandardDAO daoContract = new StandardDAO(
             msg.sender,
@@ -49,7 +47,8 @@ contract DAOFactory is Ownable {
             _daoQuorum,
             _daoVotingThreshold,
             _daoOnlyMembersCanPropose,
-            _daoAllowEarlierExecution
+            _daoAllowEarlierExecution,
+            _memberWeightArr
         );
 
         // Create TreasuryContract

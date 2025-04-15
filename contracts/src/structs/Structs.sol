@@ -23,4 +23,9 @@ library Structs {
         uint256 amount;
         uint256 rewardPercentage;
     }
+
+    struct MemberWeight {
+        address memberAddress;
+        uint256 weight;
+    }
 }

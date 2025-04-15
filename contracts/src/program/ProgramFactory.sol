@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Program.sol";
 import "./Reward.sol";
 import "../structs/Structs.sol";
@@ -12,10 +11,7 @@ import "../interfaces/IProgramFactory.sol";
  * @author Your Name
  * @notice This contract facilitates the creation of ProgramContract and Reward instances.
  */
-contract ProgramFactory is Ownable, IProgramFactory {
-
-
-    constructor() Ownable(msg.sender) {}
+contract ProgramFactory is IProgramFactory {
 
     /**
      * @dev Creates a new Program and Reward pair.

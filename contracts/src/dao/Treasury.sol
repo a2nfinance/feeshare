@@ -190,29 +190,27 @@ contract Treasury is Ownable, ReentrancyGuard, ITreasury {
         _;
     }
 
-    /**
-     * @dev Emergency function to withdraw all whitelisted tokens to a specified address.
-     *      This function is intended for emergency situations where the funds need to be quickly moved.
-     *      It can only be called by the contract owner.
-     * @param _withdrawnTo The address to send the tokens to.
+   /**
+     * @inheritdoc ITreasury
      */
     function emergencyWithdrawal(address _withdrawnTo) external onlyDAO nonReentrant {
         require(_withdrawnTo != address(0), "Withdrawal address cannot be zero.");
-
+        uint256 balance = 0;
         uint256 tokenCount = whitelistedTokens.length();
         for (uint256 i = 0; i < tokenCount; i++) {
             address tokenAddress = whitelistedTokens.at(i);
             IERC20 token = IERC20(tokenAddress);
-            uint256 balance = token.balanceOf(address(this));
+            balance = token.balanceOf(address(this));
 
             if (balance > 0) {
                 require(token.transfer(_withdrawnTo, balance), "Emergency transfer failed.");
             }
         }
 
-        uint256 balance = address(this).balance;
+        balance = address(this).balance;
         if (balance > 0) {
-            _withdrawnTo.call{value: balance}("");
+            (bool success, ) = _withdrawnTo.call{value: balance}("");
+            require(success, "Emergency native token transfer failed.");
         }
 
         emit EmergencyWithdrawal(_withdrawnTo);
