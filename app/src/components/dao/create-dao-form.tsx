@@ -8,14 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-
+import { BaseError, getAddress } from 'viem'
 import { useFieldArray, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-
+import { toast } from 'sonner';
 import { useWriteContract } from 'wagmi';
 import { abi } from '@/lib/abi/DAOFactory.json';
 import { Summary } from './Summary';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
     daoName: z.string().min(3),
@@ -28,6 +29,7 @@ const formSchema = z.object({
     daoAllowEarlierExecution: z.boolean(),
     initialWhitelistedTokens: z.string().array(),
     initialWhitelistedFunders: z.string().array(),
+    members: z.string().array(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -49,6 +51,7 @@ export default function CreateDAOForm() {
             daoAllowEarlierExecution: false,
             initialWhitelistedTokens: [''],
             initialWhitelistedFunders: [''],
+            members: ['']
         },
         mode: "onChange"
     });
@@ -73,26 +76,55 @@ export default function CreateDAOForm() {
         name: "initialWhitelistedTokens",
     });
 
-    const onSubmit = async (data: FormData) => {
-        const tx = await writeContractAsync({
-            abi,
-            address: '0xYourDAOFactoryAddress',
-            functionName: 'createContracts',
-            args: [
-                data.daoName,
-                data.daoDescription,
-                data.daoXAccount,
-                data.daoDiscordAccount,
-                data.daoQuorum,
-                data.daoVotingThreshold,
-                data.daoOnlyMembersCanPropose,
-                data.daoAllowEarlierExecution,
-                data.initialWhitelistedTokens,
-                data.initialWhitelistedFunders,
-            ],
-        });
+    const {
+        fields: membersFields,
+        append: membersAppend,
+        remove: membersRemove,
+    } = useFieldArray({
+        control: form.control,
+        // @ts-ignore
+        name: "members",
+    });
 
-        console.log('DAO Created TX:', tx);
+    const [createDAOProcessing, setCreateDAOProcessing] = useState(false)
+
+    const onSubmit = async (data: FormData) => {
+        try {
+            if (process.env.NEXT_PUBLIC_DAO_FACTORY) {
+                setCreateDAOProcessing(true);
+                const tx = await writeContractAsync({
+                    abi,
+                    address: getAddress(process.env.NEXT_PUBLIC_DAO_FACTORY),
+                    functionName: 'createContracts',
+                    args: [
+                        data.daoName,
+                        data.daoDescription,
+                        data.daoXAccount,
+                        data.daoDiscordAccount,
+                        data.daoQuorum,
+                        data.daoVotingThreshold,
+                        data.daoOnlyMembersCanPropose,
+                        data.daoAllowEarlierExecution,
+                        data.initialWhitelistedTokens.map(i => i.trim().toLowerCase()),
+                        data.initialWhitelistedFunders.map(i => i.trim().toLowerCase()),
+                        data.members.map(m => [getAddress(m.trim()),1])
+                    ],
+                });
+
+                console.log('DAO Created TX:', tx);
+            }
+        } catch (e: any) {
+            if (e instanceof BaseError) {
+                toast.error(`Error: ${e.shortMessage}`)
+            } else {
+                toast.error(`Error: ${e.message}`)
+            }
+            
+        }
+
+        setCreateDAOProcessing(false)
+
+
     };
 
     const summary = form.getValues();
@@ -141,7 +173,7 @@ export default function CreateDAOForm() {
                                         )}
                                     />
 
-<FormField
+                                    <FormField
                                         control={form.control}
                                         name="daoXAccount"
                                         render={({ field }) => (
@@ -333,7 +365,52 @@ export default function CreateDAOForm() {
                             {/* Step 3: Whitelists */}
                             {step === 3 && (
                                 <>
-                                    Init member here
+                                    <FormField
+                                        control={form.control}
+                                        name="members"
+                                        render={() => (
+                                            <FormItem>
+                                                <FormLabel>Members</FormLabel>
+
+                                                {/* Render dynamic fields */}
+                                                <div className="space-y-2">
+                                                    {membersFields.map((field, index) => (
+                                                        <FormField
+                                                            key={field.id}
+                                                            control={form.control}
+                                                            name={`members.${index}`}
+                                                            render={({ field }) => (
+                                                                <div className="flex gap-2 items-center">
+                                                                    <FormControl>
+                                                                        <Input placeholder="0x..." {...field} />
+                                                                    </FormControl>
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="ghost"
+                                                                        onClick={() => membersRemove(index)}
+                                                                    >
+                                                                        Remove
+                                                                    </Button>
+                                                                </div>
+                                                            )}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                {/* Add new field button */}
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    className="mt-2"
+                                                    onClick={() => membersAppend(" ")}
+                                                >
+                                                    Add members
+                                                </Button>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 </>
                             )}
 
@@ -354,7 +431,10 @@ export default function CreateDAOForm() {
                                 {step < 4 ? (
                                     <Button onClick={() => setStep(step + 1)} type="button">Continue</Button>
                                 ) : (
-                                    <Button type="submit">Create DAO</Button>
+                                    <Button type="submit">
+                                        {createDAOProcessing && <Loader2 className='animate-spin' /> }
+                                        Create DAO
+                                    </Button>
                                 )}
                             </div>
                         </form>

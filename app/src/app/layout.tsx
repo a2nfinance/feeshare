@@ -5,7 +5,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import "./globals.css";
 import { Providers } from "./provider";
 import { ThemeProvider } from "@/components/theme-provider";
-
+import { Toaster } from "@/components/ui/sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,7 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -39,7 +40,9 @@ export default function RootLayout({
         >
           <Providers>
             <Layout>{children}</Layout>
+
           </Providers>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
