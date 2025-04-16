@@ -1,23 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { BaseError, getAddress } from 'viem'
-import { useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { useWriteContract } from 'wagmi';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { abi } from '@/lib/abi/DAOFactory.json';
-import { Summary } from './Summary';
+import { config } from '@/lib/wagmi';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-
+import { useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { BaseError, getAddress, parseEventLogs } from 'viem';
+import { waitForTransactionReceipt } from 'viem/actions';
+import { useAccount, useWriteContract } from 'wagmi';
+import { z } from 'zod';
+import { Summary } from './Summary';
 const formSchema = z.object({
     daoName: z.string().min(3),
     daoDescription: z.string().min(3),
@@ -35,6 +35,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function CreateDAOForm() {
+    const { address, chainId } = useAccount()
     const [step, setStep] = useState(0);
     const { writeContractAsync } = useWriteContract();
 
@@ -90,7 +91,9 @@ export default function CreateDAOForm() {
 
     const onSubmit = async (data: FormData) => {
         try {
-            if (process.env.NEXT_PUBLIC_DAO_FACTORY) {
+
+
+            if (process.env.NEXT_PUBLIC_DAO_FACTORY && chainId) {
                 setCreateDAOProcessing(true);
                 const tx = await writeContractAsync({
                     abi,
@@ -107,11 +110,45 @@ export default function CreateDAOForm() {
                         data.daoAllowEarlierExecution,
                         data.initialWhitelistedTokens.map(i => i.trim().toLowerCase()),
                         data.initialWhitelistedFunders.map(i => i.trim().toLowerCase()),
-                        data.members.map(m => [getAddress(m.trim()),1])
+                        data.members.map(m => [getAddress(m.trim()), 1])
                     ],
                 });
 
                 console.log('DAO Created TX:', tx);
+                
+                // @ts-ignore
+                const receipt = await waitForTransactionReceipt(config.getClient(chainId), {
+                    hash: tx,
+                });
+
+                const logs: any[] = parseEventLogs({
+                    abi,
+                    eventName: 'DAOCreated',
+                    logs: receipt.logs,
+                });
+
+
+                if (logs.length > 0) {
+                    const { daoContract, treasuryContract } = logs[0].args;
+                    console.log('DAO Contract:', daoContract);
+                    console.log('Treasury Contract:', treasuryContract);
+
+
+                    let req = await fetch("/api/dao", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            creator: address,
+                            dao_address: daoContract,
+                            treasury_address: treasuryContract,
+                            params: data
+                        })
+                    })
+                    let res = await req.json();
+                }
+                
+
+                toast.success(`DAO & Treasury contracts were create successfull!`)
             }
         } catch (e: any) {
             if (e instanceof BaseError) {
@@ -119,7 +156,7 @@ export default function CreateDAOForm() {
             } else {
                 toast.error(`Error: ${e.message}`)
             }
-            
+
         }
 
         setCreateDAOProcessing(false)
@@ -432,7 +469,7 @@ export default function CreateDAOForm() {
                                     <Button onClick={() => setStep(step + 1)} type="button">Continue</Button>
                                 ) : (
                                     <Button type="submit">
-                                        {createDAOProcessing && <Loader2 className='animate-spin' /> }
+                                        {createDAOProcessing && <Loader2 className='animate-spin' />}
                                         Create DAO
                                     </Button>
                                 )}
