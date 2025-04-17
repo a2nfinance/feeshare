@@ -7,7 +7,7 @@ import "../interfaces/IProgram.sol";
 
 /**
  * @title Program
- * @author Your Name
+ * @author a2nfinance
  * @notice This contract defines a program with reward rules, whitelisted applications, and beneficiaries.
  */
 contract Program is Ownable, IProgram {
@@ -20,6 +20,9 @@ contract Program is Ownable, IProgram {
 
     // Fixed Reward Percentage
     uint256 public fixedRewardPercentage;
+
+    // Array of whitelisted apps.
+    Structs.App[] public apps;
 
     // Reward Rules: amount, rewardPercentage
     Structs.Rule[] public rewardRules;
@@ -82,7 +85,16 @@ contract Program is Ownable, IProgram {
     function addWhitelistedAppContracts(
         uint256 _appId,
         address[] memory _contracts
-    ) external {
+    ) external onlyOwner {
+        _addWhitelistedAppContracts(_appId, _contracts);
+    }
+
+    /**
+     * To add whitelisted Contracts
+     */
+    function _addWhitelistedAppContracts(uint256 _appId,
+        address[] memory _contracts
+    ) internal {
         require(
             msg.sender == daoAddress,
             "Only the DAO address can call this function."
@@ -99,11 +111,22 @@ contract Program is Ownable, IProgram {
 
         emit WhitelistedAppContractsAdded(_appId, _contracts);
     }
+    
+    /**
+     * @inheritdoc IProgram
+     */
+     function addWhitelistedApp(Structs.App memory _app, address[] memory _whitelistedAppContracts) external onlyOwner {
+        // Validate here
+        uint256 appId = apps.length;
+        apps.push(_app);
+        _setBeneficiaryApp(appId, _app.beneficiaryApp);
+        _addWhitelistedAppContracts(appId, _whitelistedAppContracts);
+     }
 
     /**
      * @inheritdoc IProgram
      */
-    function removeWhitelistedApp(uint256 _appId) external {
+    function removeWhitelistedApp(uint256 _appId) external onlyOwner {
         require(
             msg.sender == daoAddress,
             "Only the DAO address can call this function."
@@ -120,7 +143,7 @@ contract Program is Ownable, IProgram {
     function removeWhitelistedAppContract(
         uint256 _appId,
         address _contractAddress
-    ) external {
+    ) external onlyOwner {
         require(
             msg.sender == daoAddress,
             "Only the DAO address can call this function."
@@ -174,6 +197,16 @@ contract Program is Ownable, IProgram {
         uint256 _appId,
         address _beneficiary
     ) external onlyOwner {
+        _setBeneficiaryApp(_appId, _beneficiary);
+    }
+
+    /**
+     * To add beneficary address of whitelisted app
+     */
+    function _setBeneficiaryApp(
+        uint256 _appId,
+        address _beneficiary
+    ) internal {
         require(
             _beneficiary != address(0),
             "Beneficiary address cannot be zero."

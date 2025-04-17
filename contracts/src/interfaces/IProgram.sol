@@ -24,7 +24,13 @@ interface IProgram {
      */
     function removeWhitelistedApp(uint256 _appId) external;
 
-
+    /**
+     * @dev Add all whitelisted app for a specific app. Only the DAO address can call this function.
+     * @param _app The data of the application.
+     * @param _whitelistedAppContracts An array of contract addresses to whitelist.
+     */
+    function addWhitelistedApp(Structs.App memory _app, address[] memory _whitelistedAppContracts) external;
+    
     /**
      * @dev Removes a specific whitelisted contract for a specific app. Only the DAO address can call this function.
      * @param _appId The ID of the application.

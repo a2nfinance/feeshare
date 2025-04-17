@@ -8,7 +8,7 @@ import "../structs/Structs.sol";
 import "../interfaces/IStandardDAO.sol";
 /**
  * @title StandardDAO
- * @author Your Name
+ * @author a2nfinance
  * @notice This contract implements a standard DAO with voting, proposals, and member management.
  */
 contract StandardDAO is Ownable, IStandardDAO {

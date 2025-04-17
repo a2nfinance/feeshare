@@ -8,7 +8,7 @@ import "../interfaces/IProgramFactory.sol";
 
 /**
  * @title ProgramFactory
- * @author Your Name
+ * @author a2nfinance
  * @notice This contract facilitates the creation of ProgramContract and Reward instances.
  */
 contract ProgramFactory is IProgramFactory {

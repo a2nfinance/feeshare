@@ -28,4 +28,11 @@ library Structs {
         address memberAddress;
         uint256 weight;
     }
+
+    struct App {
+        string name;
+        string website;
+        string xAccount;
+        address beneficiaryApp;
+    }
 }

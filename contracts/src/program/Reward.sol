@@ -8,7 +8,7 @@ import "../interfaces/IReward.sol";
 
 /**
  * @title Reward
- * @author Your Name
+ * @author a2nfinance
  * @notice This contract manages the reward distribution for different applications based on the ProgramContract.
  */
 contract Reward is Ownable, ReentrancyGuard, IReward {

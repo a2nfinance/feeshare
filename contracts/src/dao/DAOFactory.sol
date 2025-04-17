@@ -5,7 +5,7 @@ import "./StandardDAO.sol";
 import "./Treasury.sol";
 /**
  * @title DAOFactory
- * @author Your Name
+ * @author a2nfinance
  * @notice This contract facilitates the creation of StandardDAO and TreasuryContract instances.
  */
 contract DAOFactory {

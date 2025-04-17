@@ -10,7 +10,7 @@ import "../interfaces/ITreasury.sol";
 
 /**
  * @title Treasury
- * @author Your Name
+ * @author a2nfinance
  * @notice This contract manages the DAO's treasury, allowing whitelisted accounts to add funds
  *         and the DAO contract to send funds.
  */
