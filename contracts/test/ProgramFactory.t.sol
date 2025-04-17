@@ -46,7 +46,8 @@ contract ProgramFactoryTest is Test {
             endDate,
             fixedRewardPercentage,
             rewardRules,
-            avsSubmitContract
+            avsSubmitContract,
+            0
         );
 
         // Get the ProgramCreated event and extract the contract addresses
@@ -68,7 +69,7 @@ contract ProgramFactoryTest is Test {
         assertEq(programContract.getRewardRule(1).rewardPercentage,10,"Rule amount 200");
 
         // Verify that the Reward contract has the correct parameters
-        Reward rewardContract = Reward(rewardContractAddress);
+        Reward rewardContract = Reward(payable(rewardContractAddress));
         assertEq(rewardContract.programContractAddress(), address(programContract), "Reward Program address should be correct");
         assertEq(rewardContract.avsSubmitContractAddress(), avsSubmitContract, "Reward AVS Submit address should be correct");
     }
