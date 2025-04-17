@@ -1,0 +1,468 @@
+'use client';
+
+import { Separator } from '@/components/common/Separator';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from '@/components/ui/dialog';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useFieldArray, useForm } from 'react-hook-form';
+import { BaseError, encodeFunctionData, getAddress, parseEther, parseEventLogs } from 'viem';
+import { z } from 'zod';
+import { AddressInput } from '../common/AddressInput';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+
+import { abi } from "@/lib/abi/DAO.json";
+import { abi as programABI } from "@/lib/abi/ProgramFactory.json";
+import { config } from '@/lib/wagmi';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { waitForTransactionReceipt } from 'viem/actions';
+import { useAccount, useWriteContract } from 'wagmi';
+
+const proposalSchema = z.object({
+    name: z.string().min(1),
+    durationInDays: z.coerce.number().min(1),
+    type: z.enum(['incentive', 'sendfund']),
+
+    // Incentive fields
+    targetContract: z.string().optional(),
+    startDate: z.coerce.number().optional(),
+    endDate: z.coerce.number().optional(),
+    rewardType: z.enum(["fixed", "dynamic"]),
+    fixedRewardPercentage: z.coerce.number().optional(),
+    rewardRules: z.array(
+        z.object({
+            amount: z.coerce.number(),
+            percentage: z.coerce.number()
+        })
+    ).optional(),
+    avsSubmitContract: z.string().optional(),
+
+    // Send fund fields
+    tokenAddress: z.string().optional(),
+    receiverAddress: z.string().optional(),
+    amount: z.coerce.number().optional()
+});
+
+type ProposalFormValues = z.infer<typeof proposalSchema>;
+
+export function NewProposal({ dao_address, treasury_address, dao_id }: { dao_address: string, treasury_address: string, dao_id: string }) {
+    const { address, chainId } = useAccount()
+    const [open, setOpen] = useState(false);
+    const [createProposalProcessing, setCreateProposalProcessing] = useState(false)
+    const { writeContractAsync } = useWriteContract();
+
+    const form = useForm<ProposalFormValues>({
+        resolver: zodResolver(proposalSchema),
+        defaultValues: {
+            name: '',
+            durationInDays: 7,
+            type: 'incentive',
+            rewardType: "fixed",
+            fixedRewardPercentage: 5,
+            rewardRules: [{ amount: 1, percentage: 10 }],
+            avsSubmitContract: ""
+        }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "rewardRules"
+    });
+
+    const watchRewardType = form.watch("rewardType");
+
+    const onSubmit = async (data: ProposalFormValues) => {
+        try {
+            let callData: `0x${string}` = '0x';
+
+            if (data.type === 'incentive') {
+
+                const startTimestamp = Math.floor(new Date(data.startDate!).getTime() / 1000);
+                const endTimestamp = Math.floor(new Date(data.endDate!).getTime() / 1000);
+                const rules = data.rewardRules!.map(
+                    (rw: { amount: number, percentage: number }) => ([parseEther(`${rw.amount}`), BigInt(rw.percentage * 100)])
+                );
+
+                callData = encodeFunctionData({
+                    abi: programABI,
+                    functionName: 'createContracts',
+                    args: [
+                        `0x${dao_address.trim().replace("0x", "")}`,
+                        BigInt(startTimestamp),
+                        BigInt(endTimestamp),
+                        BigInt(data.fixedRewardPercentage! * 100),
+                        rules,
+                        `0x${data.avsSubmitContract!.trim().replace("0x", "")}`,
+                        data.rewardType === "fixed" ? BigInt(0) : BigInt(1)
+                    ]
+                });
+                console.log("params:", `0x${dao_address.trim().replace("0x", "")}`,
+                    BigInt(startTimestamp),
+                    BigInt(endTimestamp),
+                    BigInt(data.fixedRewardPercentage! * 100),
+                    rules,
+                    `0x${data.avsSubmitContract!.trim().replace("0x", "")}`,
+                    data.rewardType === "fixed" ? BigInt(0) : BigInt(1))
+                console.log("callData:", callData)
+            }
+
+            if (data.type === 'sendfund') {
+                callData = encodeFunctionData({
+                    abi: [
+                        {
+                            name: 'sendFund',
+                            type: 'function',
+                            stateMutability: 'nonpayable',
+                            inputs: [
+                                { name: 'tokenAddress', type: 'address' },
+                                { name: 'receiverAddress', type: 'address' },
+                                { name: 'amount', type: 'uint256' }
+                            ],
+                            outputs: []
+                        }
+                    ],
+                    functionName: 'sendFund',
+                    args: [
+                        `0x${data.tokenAddress!.trim().replace("0x", "")}`,
+                        `0x${data.receiverAddress!.trim().replace("0x", "")}`,
+                        parseEther(data.amount!.toString())
+                    ]
+                });
+            }
+
+
+
+
+            if (dao_address && chainId) {
+                setCreateProposalProcessing(true);
+                const tx = await writeContractAsync({
+                    abi,
+                    address: getAddress(dao_address),
+                    functionName: 'createProposal',
+                    args: [
+                        data.name,
+                        data.targetContract,
+                        callData,
+                        data.durationInDays
+                    ],
+                });
+
+                console.log('DAO Created TX:', tx);
+
+                // @ts-ignore
+                const receipt = await waitForTransactionReceipt(config.getClient(chainId), {
+                    hash: tx,
+                });
+
+
+                const logs: any[] = parseEventLogs({
+                    abi,
+                    eventName: 'ProposalCreated',
+                    logs: receipt.logs,
+                });
+
+
+                if (logs.length > 0) {
+                    const { proposalId, name , sender} = logs[0].args;
+                    console.log(logs[0].args)
+                    console.log('Proposal ID:', proposalId);
+
+
+                    let req = await fetch("/api/proposal", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            creator: address,
+                            onchain_id: parseInt(proposalId),
+                            dao_id: dao_id,
+                            duration_in_days: data.durationInDays,
+                            proposal_type: data.type,
+                            dao_address: dao_address,
+                            params: data
+                        })
+                    })
+                    let res = await req.json();
+                    if (res.success) {
+                        toast.success(`Proposal was created successfull!`)
+                    }
+
+                }
+            }
+
+            setOpen(false);
+            form.reset();
+        } catch (e: any) {
+            if (e instanceof BaseError) {
+                toast.error(`Error: ${e.shortMessage}`)
+            } else {
+                toast.error(`Error: ${e.message}`)
+            }
+
+        }
+
+        setCreateProposalProcessing(false)
+
+    };
+
+    const type = form.watch('type');
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen} modal={true}>
+            <DialogTrigger asChild>
+                <Button>New Proposal</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Create Proposal</DialogTitle>
+                </DialogHeader>
+
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <Separator title='General Information' />
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl><Input {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className='grid grid-cols-2 gap-4 items-center'>
+                            <FormField
+                                control={form.control}
+                                name="durationInDays"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Duration (days)</FormLabel>
+                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="type"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Template</FormLabel>
+                                        <FormControl>
+                                            <select
+                                                {...field}
+                                                className="w-full border rounded px-3 py-2 bg-background"
+                                            >
+                                                <option value="incentive">Incentive Program</option>
+                                                <option value="sendfund">Send Fund</option>
+                                            </select>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+
+
+                        {type === 'incentive' && (
+                            <>
+                                <Separator title='Program Settings' />
+                                <div className='grid grid-cols-2 gap-4 items-center'>
+                                    <FormField name="targetContract" defaultValue={process.env.NEXT_PUBLIC_PROGRAM_FACTORY!} control={form.control} render={({ field, fieldState }) => (
+
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label="Program Factory Contract"
+                                        />
+                                    )} />
+
+                                    <FormField name="avsSubmitContract" control={form.control} render={({ field, fieldState }) => (
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label={"AVS Submit Contract"}
+                                        />
+                                    )} />
+                                </div>
+                                <div className='grid grid-cols-2 gap-4 items-center'>
+                                    <FormField
+                                        control={form.control}
+                                        name="startDate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Start Date</FormLabel>
+                                                <FormControl>
+                                                    <DatePicker
+                                                        //@ts-ignore
+                                                        selected={field.value}
+                                                        onChange={(date) => field.onChange(date)}
+                                                        showTimeSelect
+                                                        dateFormat="Pp"
+                                                        className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm shadow-sm"
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="endDate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>End Date</FormLabel>
+                                                <FormControl>
+                                                    <DatePicker
+                                                        //@ts-ignore
+                                                        selected={field.value}
+                                                        onChange={(date) => field.onChange(date)}
+                                                        showTimeSelect
+                                                        dateFormat="Pp"
+                                                        className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm shadow-sm"
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <Separator title='Reward Settings' />
+                                <FormField
+                                    control={form.control}
+                                    name="rewardType"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel></FormLabel>
+                                            <FormControl>
+                                                <RadioGroup
+                                                    onValueChange={field.onChange}
+                                                    defaultValue={field.value}
+                                                    className="flex flex-row space-x-4"
+                                                >
+                                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                                        <FormControl>
+                                                            <RadioGroupItem value="fixed" />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal">Fixed Reward</FormLabel>
+                                                    </FormItem>
+                                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                                        <FormControl>
+                                                            <RadioGroupItem value="dynamic" />
+                                                        </FormControl>
+                                                        <FormLabel className="font-normal">Dynamic Rules</FormLabel>
+                                                    </FormItem>
+                                                </RadioGroup>
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* Conditionally render based on rewardType */}
+                                {watchRewardType === "fixed" && (
+                                    <FormField name="fixedRewardPercentage" control={form.control} render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Percentage (%)</FormLabel>
+                                            <FormControl><Input type="number" {...field} /></FormControl>
+                                        </FormItem>
+                                    )} />
+                                )}
+
+                                {watchRewardType === "dynamic" && (
+                                    <div className="space-y-4">
+                                        <FormLabel></FormLabel>
+
+                                        {fields.map((fieldItem, index) => (
+                                            <div key={fieldItem.id} className="grid grid-cols-3 gap-4 items-end">
+                                                <FormField name={`rewardRules.${index}.amount`} control={form.control} render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Amount (ETH)</FormLabel>
+                                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                                    </FormItem>
+                                                )} />
+                                                <FormField name={`rewardRules.${index}.percentage`} control={form.control} render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Reward (%)</FormLabel>
+                                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                                    </FormItem>
+                                                )} />
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    onClick={() => remove(index)}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </div>
+                                        ))}
+
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            onClick={() => append({ amount: 0, percentage: 0 })}
+                                        >
+                                            Add New Rule
+                                        </Button>
+                                    </div>
+                                )}
+
+
+
+                            </>
+                        )}
+
+                        {type === 'sendfund' && (
+                            <>
+                                <FormField name="tokenAddress" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Token Address</FormLabel>
+                                        <FormControl><Input {...field} /></FormControl>
+                                    </FormItem>
+                                )} />
+                                <FormField name="receiverAddress" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Receiver Address</FormLabel>
+                                        <FormControl><Input {...field} /></FormControl>
+                                    </FormItem>
+                                )} />
+                                <FormField name="amount" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Amount (ETH)</FormLabel>
+                                        <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                    </FormItem>
+                                )} />
+                            </>
+                        )}
+
+                        <Button type="submit" className="w-full">
+                            {createProposalProcessing && <Loader2 className='animate-spin' />}
+                            Submit
+                        </Button>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
