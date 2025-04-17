@@ -2,7 +2,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type DAO = {
     _id: string;
@@ -14,6 +17,7 @@ type DAO = {
 };
 
 export default function DaoListPage() {
+    const router = useRouter()
     const [daos, setDaos] = useState<DAO[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -35,14 +39,15 @@ export default function DaoListPage() {
                 <Card key={dao._id} className="hover:shadow-lg transition-shadow duration-300 ">
                     <CardHeader>
                         <CardTitle>{dao.params.daoName}</CardTitle>
+                        <CardDescription>{dao.params.daoDescription}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-gray-600 mb-2">{dao.params.daoDescription}</p>
+                        <p className="text-sm text-gray-600 mb-2"></p>
                         <p className="text-xs text-gray-500">
-                            X: <a href={`https://twitter.com/${dao.params.daoXAccount.replace("@", "")}`} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="text-blue-500">@{dao.params.daoXAccount.replace("@", "")}
+                            X: <a href={`https://twitter.com/${dao.params.daoXAccount.replace("@", "")}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-blue-500">@{dao.params.daoXAccount.replace("@", "")}
                             </a>
                         </p>
                         {/* <p className="text-xs text-gray-500">
@@ -55,6 +60,11 @@ export default function DaoListPage() {
               Treasury: {dao.treasuryAddress}
             </p> */}
                     </CardContent>
+                    <CardFooter>
+                        <Button className="w-full" onClick={() => router.push(`/dao/${dao._id}`)}>
+                            <Check /> View Details
+                        </Button>
+                    </CardFooter>
                 </Card>
             ))}
         </div>

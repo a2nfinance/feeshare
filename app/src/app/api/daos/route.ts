@@ -7,7 +7,7 @@ export async function GET() {
     try {
         await connectToDatabase();
 
-        let daos = await DAO.find().sort({"createdAt": 1});
+        let daos = await DAO.find().sort({"created_at": 1});
      
         return NextResponse.json(
             {success: true, daos: daos}

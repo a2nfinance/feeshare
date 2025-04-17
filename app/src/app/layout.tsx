@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={` antialiased`}
       >
         <ThemeProvider
           attribute="class"
