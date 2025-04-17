@@ -24,6 +24,6 @@ let dao = new Schema({
         default: Date.now
     }
 });
-let Experiment = mongoose.model('DAO', dao);
+let DAO = mongoose.model('DAO', dao);
 mongoose.models = {};
-export default Experiment;
+export default DAO;
