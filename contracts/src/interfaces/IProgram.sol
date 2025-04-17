@@ -30,7 +30,7 @@ interface IProgram {
      * @param _whitelistedAppContracts An array of contract addresses to whitelist.
      */
     function addWhitelistedApp(Structs.App memory _app, address[] memory _whitelistedAppContracts) external;
-    
+
     /**
      * @dev Removes a specific whitelisted contract for a specific app. Only the DAO address can call this function.
      * @param _appId The ID of the application.
@@ -60,6 +60,12 @@ interface IProgram {
      */
     function setBeneficiaryApp(uint256 _appId, address _beneficiary) external;
 
+
+    /**
+     * @dev Update reward type
+     * @param _rewardType The reward type of program.
+     */
+     function setRewardType(uint256 _rewardType) external;
 
     /**
      * @dev Returns whether a contract address is whitelisted for a specific app.

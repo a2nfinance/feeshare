@@ -9,7 +9,8 @@ interface IProgramFactory {
         uint256 _endDate,
         uint256 _fixedRewardPercentage,
         Structs.Rule[] memory _rewardRules,
-        address _avsSubmitContractAddress
+        address _avsSubmitContractAddress,
+        uint256 _rewardType
     ) external;
     // Events
     event ProgramCreated(address programContract, address rewardContract);

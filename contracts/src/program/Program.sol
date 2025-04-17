@@ -18,6 +18,10 @@ contract Program is Ownable, IProgram {
     uint256 public startDate;
     uint256 public endDate;
 
+    // Reward Type
+
+    uint256 public rewardType;
+
     // Fixed Reward Percentage
     uint256 public fixedRewardPercentage;
 
@@ -41,6 +45,7 @@ contract Program is Ownable, IProgram {
      * @param _endDate The end date of the program.
      * @param _fixedRewardPercentage The fixed reward percentage.
      * @param _rewardRules The reward rules.
+     * @param _rewardType The reward type.
      */
     constructor(
         address _owner,
@@ -48,7 +53,8 @@ contract Program is Ownable, IProgram {
         uint256 _startDate,
         uint256 _endDate,
         uint256 _fixedRewardPercentage,
-        Structs.Rule[] memory _rewardRules
+        Structs.Rule[] memory _rewardRules,
+        uint256 _rewardType
     ) Ownable(_owner) {
         require(_owner != address(0), "Owner address cannot be zero.");
         require(_daoAddress != address(0), "DAO address cannot be zero.");
@@ -58,6 +64,7 @@ contract Program is Ownable, IProgram {
         startDate = _startDate;
         endDate = _endDate;
         fixedRewardPercentage = _fixedRewardPercentage;
+        rewardType = _rewardType;
         for (uint i = 0; i < _rewardRules.length; i++) {
             rewardRules.push(_rewardRules[i]);
         }
@@ -198,6 +205,15 @@ contract Program is Ownable, IProgram {
         address _beneficiary
     ) external onlyOwner {
         _setBeneficiaryApp(_appId, _beneficiary);
+    }
+
+    /**
+     * @inheritdoc IProgram
+     */
+    function setRewardType(
+        uint256 _rewardType
+    ) external onlyOwner {
+        rewardType = _rewardType;
     }
 
     /**

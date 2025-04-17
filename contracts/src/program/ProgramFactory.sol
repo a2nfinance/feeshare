@@ -21,6 +21,7 @@ contract ProgramFactory is IProgramFactory {
      * @param _fixedRewardPercentage The fixed reward percentage.
      * @param _rewardRules The reward rules.
      * @param _avsSubmitContractAddress The address of the AVS Submit Contract for Reward.
+     * @param _rewardType The reward type of a program.
      */
     function createContracts(
         address _daoAddress,
@@ -28,7 +29,8 @@ contract ProgramFactory is IProgramFactory {
         uint256 _endDate,
         uint256 _fixedRewardPercentage,
         Structs.Rule[] memory _rewardRules,
-        address _avsSubmitContractAddress
+        address _avsSubmitContractAddress,
+        uint256 _rewardType
     ) external {
         // Create Program
         // Require(_daoAddress == msg.sender, "Sender != DAOAddress");
@@ -40,7 +42,8 @@ contract ProgramFactory is IProgramFactory {
             _startDate,
             _endDate,
             _fixedRewardPercentage,
-            _rewardRules
+            _rewardRules,
+            _rewardType
         );
 
         // Create Reward contract
