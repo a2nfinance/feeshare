@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+import "../structs/Structs.sol";
 
 interface IStandardDAO {
     /**
@@ -82,6 +83,13 @@ interface IStandardDAO {
      * @return The number of proposals.
      */
     function getProposalCount() external view returns (uint256);
+
+    /**
+     * @dev Returns voting status
+     * @param _proposalId The ID of a proposal
+     * @return The voting data.
+     */
+    function getVotingStatus(uint256 _proposalId) external view returns (uint256, uint256, uint256, Structs.Proposal memory, bool);
 
     // Events
     event ProposalCreated(uint256 proposalId, string name, address proposer);

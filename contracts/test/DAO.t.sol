@@ -236,9 +236,8 @@ contract DAOTest is Test {
         ) = getProgramCreatedAddresses();
 
         // 2. Encode data
-        Program programContract = Program(programContractAddress);
+        
         console.log("address(daoContract):", address(daoContract));
-        console.log("Owner:", programContract.owner());
         // 2. Create a whitelistedApp proposal
         Structs.App memory app = Structs.App({
             name: "payment app",
@@ -284,10 +283,16 @@ contract DAOTest is Test {
         vm.warp(block.timestamp + 4 days);
         //Execute
         vm.prank(address(this));
+        
+        // Check voting status information
+        (uint256 memberLength, uint256 quorum, uint256 threshold, Structs.Proposal memory proposal, bool allowExecution) = daoContract.getVotingStatus(proposalId);
+
+        console.log(memberLength, quorum, threshold, allowExecution);
+        console.log(proposal.name);
    
         daoContract.executeProposal(proposalId);
 
-        
+        Program programContract = Program(programContractAddress);
         
         (string memory name, string memory website, string memory xAccount, address beneficiaryApp) = programContract.apps(0);
 

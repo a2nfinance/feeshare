@@ -191,6 +191,22 @@ contract StandardDAO is Ownable, IStandardDAO {
         emit ProposalExecuted(_proposalId, msg.sender);
     }
 
+    function _isAllowExecute(uint256 _proposalId) internal view returns (bool) {
+        uint256 totalVotes = 0;
+        for (uint256 i = 0; i < members.length(); i++) {
+            if (hasVoted[_proposalId][members.at(i)]) {
+                totalVotes += 1;
+            }
+            
+        }
+
+        uint256 totalVotesFor = proposals[_proposalId].totalVotesFor;
+        uint256 totalVotesAgainst = proposals[_proposalId].totalVotesAgainst;
+
+        return (totalVotes * denominator / members.length()) >= quorum && (totalVotesFor * denominator / (totalVotesFor + totalVotesAgainst)) >= votingThreshold;
+       
+    }
+
     /**
      * @inheritdoc IStandardDAO
      */
@@ -233,6 +249,12 @@ contract StandardDAO is Ownable, IStandardDAO {
      */
     function getProposalCount() public view returns (uint256) {
         return proposals.length;
+    }
+    /**
+     * @inheritdoc IStandardDAO
+     */
+    function getVotingStatus(uint256 _proposalId) public view returns (uint256, uint256, uint256, Structs.Proposal memory, bool) {
+        return (members.length(), quorum, votingThreshold, proposals[_proposalId], _isAllowExecute(_proposalId));
     }
 
 }
