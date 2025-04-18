@@ -1,6 +1,6 @@
 import connectToDatabase from "@/database/connect";
 import { NextRequest, NextResponse } from "next/server";
-import Proposal from "@/database/models/proposal"
+import Program from "@/database/models/program"
 
 export async function POST(req: NextRequest) {
 
@@ -14,11 +14,15 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let objs = await Proposal.find({dao_id: body.dao_id}).sort({"created_at": "desc"});
+        let obj = new Program(
+            body
+        )
 
+
+        let savedObj = await obj.save()
      
         return NextResponse.json(
-            {success: true, proposals: objs}
+            {success: true, programId: savedObj._id}
         );
     } catch (error) {
         return NextResponse.json(

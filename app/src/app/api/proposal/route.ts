@@ -32,3 +32,29 @@ export async function POST(req: NextRequest) {
     
 }
 
+
+export async function PUT(req: NextRequest) {
+
+    try {
+        const body = await req.json();
+        if (!body) {
+            return NextResponse.json(
+                { success: false, message: "Not found body data" },
+            );
+        }
+
+        await connectToDatabase();
+
+        Proposal.findByIdAndUpdate(body._id, {status: body.status})
+     
+        return NextResponse.json(
+            {success: true, proposalId: body._id}
+        );
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : error},
+        );
+    }
+    
+}
+
