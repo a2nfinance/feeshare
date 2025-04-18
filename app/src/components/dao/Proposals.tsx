@@ -11,15 +11,16 @@ export const Proposals = (
     { dao_address, treasury_address, dao_id }: { dao_address: string, treasury_address: string, dao_id: string }
 ) => {
     const [proposals, setProposals] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [openDialog, setOpenDialog] = useState(false)
     const [selectedProposal, setSelectedProposal] = useState(null)
 
-    useEffect(() => {
+    function fetchProposals() {
+        setLoading(true);
         fetch('/api/proposals', {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({dao_id: dao_id})
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ dao_id: dao_id })
         })
             .then(res => res.json())
             .then(data => {
@@ -27,6 +28,10 @@ export const Proposals = (
                 setProposals(data.proposals);
                 setLoading(false);
             });
+    }
+
+    useEffect(() => {
+        fetchProposals()
     }, []);
 
     if (loading) return <div className="p-4 text-gray-500">Loading...</div>;
@@ -36,7 +41,7 @@ export const Proposals = (
         <Card className="md:col-span-2" >
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">Proposals</CardTitle>
-                <NewProposal dao_address={dao_address} treasury_address={treasury_address} dao_id={dao_id} />
+                <NewProposal dao_address={dao_address} fetchProposals={fetchProposals} dao_id={dao_id} />
             </CardHeader>
             <CardContent>
                 <Table>
@@ -64,7 +69,7 @@ export const Proposals = (
                         ))}
                     </TableBody>
                 </Table>
-                <ProposalDetail open={openDialog} setOpen={setOpenDialog} proposalDetail={selectedProposal}/>
+                <ProposalDetail open={openDialog} setOpen={setOpenDialog} proposalDetail={selectedProposal} />
             </CardContent>
         </Card >
     )

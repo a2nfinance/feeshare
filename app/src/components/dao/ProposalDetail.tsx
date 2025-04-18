@@ -4,6 +4,7 @@ import AddressDisplay from "../common/AddressDisplay";
 import { Separator } from "../common/Separator"
 import { Card, CardContent } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
+import ProposalVotingCard from "./ProposalVotingCard";
 
 
 export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolean, setOpen: (open: boolean) => void, proposalDetail: any }) => {
@@ -19,9 +20,10 @@ export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolea
         }
         return component
     }
+
     return (
         <Dialog open={open} onOpenChange={setOpen} modal={true}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-2xl overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Proposal Details</DialogTitle>
                 </DialogHeader>
@@ -40,7 +42,11 @@ export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolea
 
                 </div>
                 <Separator title="Voting Progress" />
-
+                <ProposalVotingCard
+                    daoId={proposalDetail?.dao_id}
+                    proposalDBId={proposalDetail?._id}
+                    proposalId={proposalDetail?.onchain_id}
+                    contractAddress={proposalDetail?.dao_address} />
                 <Separator title="Params" />
                 <Card>
                     <CardContent>

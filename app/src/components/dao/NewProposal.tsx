@@ -63,7 +63,7 @@ const proposalSchema = z.object({
 
 type ProposalFormValues = z.infer<typeof proposalSchema>;
 
-export function NewProposal({ dao_address, treasury_address, dao_id }: { dao_address: string, treasury_address: string, dao_id: string }) {
+export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_address: string, fetchProposals: () => void, dao_id: string }) {
     const { address, chainId } = useAccount()
     const [open, setOpen] = useState(false);
     const [createProposalProcessing, setCreateProposalProcessing] = useState(false)
@@ -114,14 +114,6 @@ export function NewProposal({ dao_address, treasury_address, dao_id }: { dao_add
                         data.rewardType === "fixed" ? BigInt(0) : BigInt(1)
                     ]
                 });
-                console.log("params:", `0x${dao_address.trim().replace("0x", "")}`,
-                    BigInt(startTimestamp),
-                    BigInt(endTimestamp),
-                    BigInt(data.fixedRewardPercentage! * 100),
-                    rules,
-                    `0x${data.avsSubmitContract!.trim().replace("0x", "")}`,
-                    data.rewardType === "fixed" ? BigInt(0) : BigInt(1))
-                console.log("callData:", callData)
             }
 
             if (data.type === 'sendfund') {
@@ -200,8 +192,10 @@ export function NewProposal({ dao_address, treasury_address, dao_id }: { dao_add
                         })
                     })
                     let res = await req.json();
+                    
                     if (res.success) {
-                        toast.success(`Proposal was created successfull!`)
+                        toast.success(`Proposal was created successfull!`);
+                        fetchProposals()
                     }
 
                 }
