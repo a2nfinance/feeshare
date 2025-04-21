@@ -41,7 +41,7 @@ export const Proposals = (
         <Card >
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg"></CardTitle>
-                <NewProposal dao_address={dao_address} fetchProposals={fetchProposals} dao_id={dao_id} />
+                <NewProposal dao_address={dao_address} fetchProposals={fetchProposals} dao_id={dao_id} treasury_address={treasury_address} />
             </CardHeader>
             <CardContent>
                 <Table>

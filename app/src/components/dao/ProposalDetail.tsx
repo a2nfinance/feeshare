@@ -47,7 +47,9 @@ export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolea
                     proposalDBId={proposalDetail?._id}
                     params={proposalDetail?.params}
                     proposalId={proposalDetail?.onchain_id}
-                    contractAddress={proposalDetail?.dao_address} />
+                    contractAddress={proposalDetail?.dao_address} 
+                    proposalType={proposalDetail?.type}
+                    />
                 <Separator title="Params" />
                 <Card>
                     <CardContent>

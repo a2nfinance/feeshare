@@ -24,9 +24,14 @@ export const AddressInput = ({
   error,
 }: AddressInputProps) => {
   const [isContract, setIsContract] = useState<null | boolean>(null);
+  const [isNative, setIsNative] = useState<null | boolean>(null);
 
   useEffect(() => {
     const check = async () => {
+      if (value === "0x0000000000000000000000000000000000000000" || value === "0x0") {
+        setIsNative(true);
+        return;
+      }
       if (!isAddress(value)) {
         setIsContract(null);
         return;
@@ -67,9 +72,10 @@ export const AddressInput = ({
       {error && <FormMessage>{error}</FormMessage>}
       {isAddress(value) && (
         <p className="text-xs text-muted-foreground mt-1">
-          {isContract === null && "🔍 Checking address type..."}
+          {(isContract === null && isNative === null) && "🔍 Checking address type..."}
           {isContract === true && "✅ This is a contract address."}
           {isContract === false && "✅ This is a wallet (EOA) address."}
+          {isNative === true && "✅ This is a native token."}
         </p>
       )}
     </FormItem>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Separator } from "../ui/separator"
 import { abi } from "@/lib/abi/DAO.json";
 import { Button } from "../ui/button"
+import { FundTreasury } from "./FundTreasury"
 
 export const DAOInfo = ({ dao }: { dao: any }) => {
 
@@ -101,11 +102,11 @@ export const DAOInfo = ({ dao }: { dao: any }) => {
 
                     <Button>Add Member</Button>
                     <Button>Add Token</Button>
-                    <Button>Fund Treasury</Button>
+                    <FundTreasury dao_address={dao.dao_address} treasury_address={dao.treasury_address} />
                 </div>
 
-                
 
+                
 
             </CardContent>
         </Card>

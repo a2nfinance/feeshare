@@ -30,6 +30,7 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 import { abi } from "@/lib/abi/DAO.json";
 import { abi as programABI } from "@/lib/abi/ProgramFactory.json";
+import { abi as TreasuryABI } from "@/lib/abi/Treasury.json";
 import { config } from '@/lib/wagmi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -42,7 +43,7 @@ const proposalSchema = z.object({
     type: z.enum(['incentive', 'sendfund']),
 
     // Incentive fields
-    title: z.string(),
+    title: z.string().optional(),
     targetContract: z.string().optional(),
     startDate: z.coerce.number().optional(),
     endDate: z.coerce.number().optional(),
@@ -64,7 +65,7 @@ const proposalSchema = z.object({
 
 type ProposalFormValues = z.infer<typeof proposalSchema>;
 
-export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_address: string, fetchProposals: () => void, dao_id: string }) {
+export function NewProposal({ dao_address, treasury_address, fetchProposals, dao_id }: { dao_address: string, treasury_address: string, fetchProposals: () => void, dao_id: string }) {
     const { address, chainId } = useAccount()
     const [open, setOpen] = useState(false);
     const [createProposalProcessing, setCreateProposalProcessing] = useState(false)
@@ -79,6 +80,7 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
             rewardType: "fixed",
             fixedRewardPercentage: 5,
             rewardRules: [{ amount: 1, percentage: 10 }],
+            amount: 0.001
         }
     });
 
@@ -118,20 +120,9 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
             }
 
             if (data.type === 'sendfund') {
+                data.targetContract = treasury_address;
                 callData = encodeFunctionData({
-                    abi: [
-                        {
-                            name: 'sendFund',
-                            type: 'function',
-                            stateMutability: 'nonpayable',
-                            inputs: [
-                                { name: 'tokenAddress', type: 'address' },
-                                { name: 'receiverAddress', type: 'address' },
-                                { name: 'amount', type: 'uint256' }
-                            ],
-                            outputs: []
-                        }
-                    ],
+                    abi: TreasuryABI,
                     functionName: 'sendFund',
                     args: [
                         `0x${data.tokenAddress!.trim().replace("0x", "")}`,
@@ -140,10 +131,7 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
                     ]
                 });
             }
-
-
-
-
+            
             if (dao_address && chainId) {
                 setCreateProposalProcessing(true);
                 const tx = await writeContractAsync({
@@ -177,8 +165,24 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
                     const { proposalId, name, sender } = logs[0].args;
                     console.log(logs[0].args)
                     console.log('Proposal ID:', proposalId);
-
-
+                    
+                    let params: any = {
+                        name: data.name, 
+                        durationInDays: data.durationInDays, 
+                        type: data.type,
+                        targetContract: data.targetContract
+                    }
+                    if (data.type === 'sendfund') {
+                        params = {...params, tokenAddress: data.tokenAddress, receiverAddress: data.receiverAddress, amount: data.amount}
+                    } else if (data.type === "incentive") {
+                        params = {
+                            ...params, 
+                            rewardType: data.rewardType, 
+                            rewardRules: data.rewardRules, 
+                            fixedRewardPercentage: data.fixedRewardPercentage,
+                            avsSubmitContract: data.avsSubmitContract
+                        }
+                    }
                     let req = await fetch("/api/proposal", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -436,21 +440,36 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
 
                         {type === 'sendfund' && (
                             <>
-                                <FormField name="tokenAddress" control={form.control} render={({ field }) => (
+                                <Separator title='Funding Settings' />
+                                <div className='grid grid-cols-2 gap-4 items-center'>
+                                <FormField name="tokenAddress" control={form.control} defaultValue='0x0000000000000000000000000000000000000000' render={({ field, fieldState }) => (
                                     <FormItem>
-                                        <FormLabel>Token Address</FormLabel>
-                                        <FormControl><Input {...field} /></FormControl>
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label="Token address"
+                                        />
                                     </FormItem>
                                 )} />
-                                <FormField name="receiverAddress" control={form.control} render={({ field }) => (
+                                <FormField name="receiverAddress" defaultValue={address} control={form.control} render={({ field, fieldState }) => (
                                     <FormItem>
-                                        <FormLabel>Receiver Address</FormLabel>
-                                        <FormControl><Input {...field} /></FormControl>
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label="Beneficiary Address"
+                                        />
                                     </FormItem>
                                 )} />
+
+                                </div>
+                                
                                 <FormField name="amount" control={form.control} render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Amount (ETH)</FormLabel>
+                                        <FormLabel>Amount</FormLabel>
                                         <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                                     </FormItem>
                                 )} />

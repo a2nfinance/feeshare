@@ -19,10 +19,11 @@ type ProposalVotingCardProps = {
     params: any,
     proposalId: number;
     contractAddress: `0x${string}`;
-    daoId: string
+    daoId: string,
+    proposalType: string
 };
 
-export default function ProposalVotingCard({proposalDBId, params, proposalId, contractAddress, daoId }: ProposalVotingCardProps) {
+export default function ProposalVotingCard({ proposalDBId, params, proposalId, contractAddress, daoId, proposalType }: ProposalVotingCardProps) {
     const [isVoting, setIsVoting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { address, chainId } = useAccount()
@@ -96,17 +97,46 @@ export default function ProposalVotingCard({proposalDBId, params, proposalId, co
                 hash: tx,
             });
 
-            const logs: any[] = parseEventLogs({
-                abi: ProgramFactoryABI,
-                eventName: 'ProgramCreated',
-                logs: receipt.logs,
-            });
+            if (proposalType === "incentive") {
+                const logs: any[] = parseEventLogs({
+                    abi: ProgramFactoryABI,
+                    eventName: 'ProgramCreated',
+                    logs: receipt.logs,
+                });
 
 
-            if (logs.length > 0) {
-                const { programContract, rewardContract } = logs[0].args;
-                console.log(logs[0].args)
-                // Update proposal
+                if (logs.length > 0) {
+                    const { programContract, rewardContract } = logs[0].args;
+                    // Update proposal
+                    await fetch("/api/proposal", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            status: "executed",
+                            _id: proposalDBId,
+                        })
+                    })
+                    // Save program
+                    let req = await fetch("/api/program", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            creator: address,
+                            title: params.title,
+                            dao_address: contractAddress,
+                            program_address: programContract,
+                            reward_address: rewardContract,
+                            dao_id: daoId,
+                            proposal_id: proposalDBId,
+                            params: params
+                        })
+                    })
+                    let res = await req.json();
+                    if (res.success) {
+                        toast.success("The proposal was executed successful!")
+                    }
+                }
+            } else if (proposalType === "sendfund") {
                 await fetch("/api/proposal", {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
@@ -115,16 +145,15 @@ export default function ProposalVotingCard({proposalDBId, params, proposalId, co
                         _id: proposalDBId,
                     })
                 })
-                // Save program
-                let req = await fetch("/api/program", {
+
+
+                let req = await fetch("/api/fund", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         creator: address,
                         title: params.title,
                         dao_address: contractAddress,
-                        program_address: programContract,
-                        reward_address: rewardContract,
                         dao_id: daoId,
                         proposal_id: proposalDBId,
                         params: params
@@ -135,6 +164,9 @@ export default function ProposalVotingCard({proposalDBId, params, proposalId, co
                     toast.success("The proposal was executed successful!")
                 }
             }
+
+
+
         } catch (err: any) {
             if (err instanceof BaseError) {
                 toast.error(`Error: ${err.shortMessage}`)
