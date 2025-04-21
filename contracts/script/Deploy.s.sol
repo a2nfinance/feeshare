@@ -8,11 +8,17 @@ import {ProgramFactory} from "../src/program/ProgramFactory.sol";
 contract DeployScript is Script {
     DAOFactory public daoFactory;
     ProgramFactory public programFactory;
+    
+    address private deployer;
 
-    function setUp() public {}
+    function setUp() public {
+        deployer = vm.rememberKey(vm.envUint("PRIVATE_KEY"));
+        vm.label(deployer, "Deployer");
+
+    }
 
     function run() public {
-        vm.startBroadcast();
+        vm.startBroadcast(deployer);
 
         daoFactory = new DAOFactory();
         programFactory = new ProgramFactory();

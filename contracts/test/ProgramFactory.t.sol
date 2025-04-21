@@ -41,6 +41,7 @@ contract ProgramFactoryTest is Test {
         vm.recordLogs();
         vm.prank(owner);
         programFactory.createContracts(
+            "Test program",
             daoAddress,
             startDate,
             endDate,

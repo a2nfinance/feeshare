@@ -75,6 +75,14 @@ interface IProgram {
      */
     function isContractWhitelisted(uint256 _appId, address _contractAddress) external view returns (bool);
 
+
+    /**
+     * @dev Returns whether a contract address is whitelisted for a specific app.
+     * @param _appId The ID of the application.
+     * @return True if the contract is whitelisted, false otherwise.
+     */
+    function isAppWhitelisted(uint256 _appId) external view returns (bool);
+
     // Events
     event RulesUpdated(uint256 fixedRewardPercentage);
     event WhitelistedAppContractsAdded(uint256 appId, address[] contracts);

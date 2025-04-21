@@ -14,6 +14,8 @@ contract Program is Ownable, IProgram {
     // DAO Address
     address public daoAddress;
 
+    string public name;
+
     // Program Start and End Dates
     uint256 public startDate;
     uint256 public endDate;
@@ -40,6 +42,7 @@ contract Program is Ownable, IProgram {
     /**
      * @dev Initializes the ProgramContract.
      * @param _owner The owner address.
+     * @param _title The program name.
      * @param _daoAddress The address of the DAO contract.
      * @param _startDate The start date of the program.
      * @param _endDate The end date of the program.
@@ -49,6 +52,7 @@ contract Program is Ownable, IProgram {
      */
     constructor(
         address _owner,
+        string memory _title,
         address _daoAddress,
         uint256 _startDate,
         uint256 _endDate,
@@ -60,6 +64,7 @@ contract Program is Ownable, IProgram {
         require(_daoAddress != address(0), "DAO address cannot be zero.");
         require(_startDate < _endDate, "Start date must be before end date.");
 
+        name = _title;
         daoAddress = _daoAddress;
         startDate = _startDate;
         endDate = _endDate;
@@ -242,6 +247,19 @@ contract Program is Ownable, IProgram {
             if (contracts[i] == _contractAddress) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    /*
+    * @inheritdoc IProgram
+    */
+    function isAppWhitelisted(
+        uint256 _appId
+    ) public view returns (bool) {
+        address[] memory contracts = whitelistedAppContracts[_appId];
+        if (contracts.length > 0) {
+            return true;
         }
         return false;
     }

@@ -53,7 +53,7 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
         require(rewardApp[_appId] > 0, "No rewards available for this app.");
 
         Program program = Program(programContractAddress);
-        require(program.isContractWhitelisted(_appId, msg.sender), "Contract is not whitelisted for this app.");
+        require(program.isAppWhitelisted(_appId), "App is not whitelisted for this app.");
 
         address beneficiary = program.beneficiaryApp(_appId);
         require(beneficiary != address(0), "Beneficiary address not set for this app.");

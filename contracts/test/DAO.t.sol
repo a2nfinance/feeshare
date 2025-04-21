@@ -90,6 +90,7 @@ contract DAOTest is Test {
         // 2. Encode the call data for ProgramFactory.createContracts
         bytes memory callData = abi.encodeWithSelector(
             IProgramFactory.createContracts.selector,
+            "Test Program",
             daoAddress,
             startDate,
             endDate,
@@ -221,6 +222,7 @@ contract DAOTest is Test {
         // DAOContract address is Program contract owner
         vm.prank(address(daoContract));
         programFactory.createContracts(
+            "Test Program",
             address(daoContract), 
             startDate, 
             endDate, 

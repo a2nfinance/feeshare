@@ -26,7 +26,6 @@ interface IReward {
     function updateReward(uint256[] memory _appIds, uint256[] memory _additionalRewards) external;
 
 
-
     /**
      * @dev Updates the program contract address. Only the owner can call this function.
      * @param _newProgramContractAddress The new address of the ProgramContract.

@@ -13,17 +13,11 @@ import "../interfaces/IProgramFactory.sol";
  */
 contract ProgramFactory is IProgramFactory {
 
-    /**
-     * @dev Creates a new Program and Reward pair.
-     * @param _daoAddress The address of the DAO contract.
-     * @param _startDate The start date of the program.
-     * @param _endDate The end date of the program.
-     * @param _fixedRewardPercentage The fixed reward percentage.
-     * @param _rewardRules The reward rules.
-     * @param _avsSubmitContractAddress The address of the AVS Submit Contract for Reward.
-     * @param _rewardType The reward type of a program.
+     /**
+     * @inheritdoc IProgramFactory
      */
     function createContracts(
+        string memory _title,
         address _daoAddress,
         uint256 _startDate,
         uint256 _endDate,
@@ -32,12 +26,9 @@ contract ProgramFactory is IProgramFactory {
         address _avsSubmitContractAddress,
         uint256 _rewardType
     ) external {
-        // Create Program
-        // Require(_daoAddress == msg.sender, "Sender != DAOAddress");
-        // Need to check whether _daoAddress must be StandardDAO contract.
-
         Program programContract = new Program(
             msg.sender,
+            _title,
             _daoAddress,
             _startDate,
             _endDate,
