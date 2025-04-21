@@ -193,7 +193,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                             duration_in_days: data.durationInDays,
                             proposal_type: data.type,
                             dao_address: dao_address,
-                            params: data
+                            params: params
                         })
                     })
                     let res = await req.json();

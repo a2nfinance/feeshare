@@ -78,14 +78,14 @@ export function FundTreasury({ dao_address, treasury_address }: { dao_address: s
                 }
 
 
-                console.log('DAO Created TX:', tx);
+                console.log('Fund treasury TX:', tx);
 
                 // @ts-ignore
                 const receipt = await waitForTransactionReceipt(config.getClient(chainId), {
                     hash: tx,
                 });
-                
-                toast.success(`Fund treasury was created successfull!`);
+
+                toast.success(`Fund treasury was sent successfull!`);
 
             }
             form.reset();

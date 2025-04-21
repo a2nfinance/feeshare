@@ -20,10 +20,11 @@ type ProposalVotingCardProps = {
     proposalId: number;
     contractAddress: `0x${string}`;
     daoId: string,
-    proposalType: string
+    proposalType: string,
+    creator?: `0x${string}`
 };
 
-export default function ProposalVotingCard({ proposalDBId, params, proposalId, contractAddress, daoId, proposalType }: ProposalVotingCardProps) {
+export default function ProposalVotingCard({ proposalDBId, params, proposalId, contractAddress, daoId, proposalType, creator }: ProposalVotingCardProps) {
     const [isVoting, setIsVoting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { address, chainId } = useAccount()
@@ -153,6 +154,34 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                     body: JSON.stringify({
                         creator: address,
                         title: params.title,
+                        dao_address: contractAddress,
+                        dao_id: daoId,
+                        proposal_id: proposalDBId,
+                        params: params
+                    })
+                })
+                let res = await req.json();
+                if (res.success) {
+                    toast.success("The proposal was executed successful!")
+                }
+            } else if (proposalType === "applyprogram") {
+                await fetch("/api/proposal", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        status: "executed",
+                        _id: proposalDBId,
+                    })
+                })
+
+
+                let req = await fetch("/api/application", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        creator: creator,
+                        application_name: params.applicationName,
+                        program_address: params.targetContract,
                         dao_address: contractAddress,
                         dao_id: daoId,
                         proposal_id: proposalDBId,

@@ -28,6 +28,6 @@ let fund = new Schema({
         default: Date.now
     }
 });
-let Fund = mongoose.model('Program', fund);
+let Fund = mongoose.model('Fund', fund);
 mongoose.models = {};
 export default Fund;

@@ -6,15 +6,11 @@ let app = new Schema({
         type: String,
         require: true
     },
-    title: {
+    application_name: {
         type: String,
         require: true
     },
     program_address: {
-        type: String,
-        require: true
-    },
-    reward_address: {
         type: String,
         require: true
     },
@@ -40,6 +36,6 @@ let app = new Schema({
         default: Date.now
     }
 });
-let App = mongoose.model('Program', app);
+let App = mongoose.model('App', app);
 mongoose.models = {};
 export default App;
