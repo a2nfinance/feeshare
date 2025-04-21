@@ -42,6 +42,7 @@ const proposalSchema = z.object({
     type: z.enum(['incentive', 'sendfund']),
 
     // Incentive fields
+    title: z.string(),
     targetContract: z.string().optional(),
     startDate: z.coerce.number().optional(),
     endDate: z.coerce.number().optional(),
@@ -78,7 +79,6 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
             rewardType: "fixed",
             fixedRewardPercentage: 5,
             rewardRules: [{ amount: 1, percentage: 10 }],
-            avsSubmitContract: ""
         }
     });
 
@@ -105,6 +105,7 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
                     abi: programABI,
                     functionName: 'createContracts',
                     args: [
+                        data.title,
                         `0x${dao_address.trim().replace("0x", "")}`,
                         BigInt(startTimestamp),
                         BigInt(endTimestamp),
@@ -173,7 +174,7 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
 
 
                 if (logs.length > 0) {
-                    const { proposalId, name , sender} = logs[0].args;
+                    const { proposalId, name, sender } = logs[0].args;
                     console.log(logs[0].args)
                     console.log('Proposal ID:', proposalId);
 
@@ -192,7 +193,7 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
                         })
                     })
                     let res = await req.json();
-                    
+
                     if (res.success) {
                         toast.success(`Proposal was created successfull!`);
                         fetchProposals()
@@ -280,6 +281,12 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
                         {type === 'incentive' && (
                             <>
                                 <Separator title='Program Settings' />
+                                <FormField name="title" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Title</FormLabel>
+                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                    </FormItem>
+                                )} />
                                 <div className='grid grid-cols-2 gap-4 items-center'>
                                     <FormField name="targetContract" defaultValue={process.env.NEXT_PUBLIC_PROGRAM_FACTORY!} control={form.control} render={({ field, fieldState }) => (
 
@@ -292,13 +299,13 @@ export function NewProposal({ dao_address, fetchProposals, dao_id }: { dao_addre
                                         />
                                     )} />
 
-                                    <FormField name="avsSubmitContract" control={form.control} render={({ field, fieldState }) => (
+                                    <FormField name="avsSubmitContract" defaultValue={process.env.NEXT_PUBLIC_AVS_CONTRACT!} control={form.control} render={({ field, fieldState }) => (
                                         <AddressInput
                                             //@ts-ignore
                                             value={field.value}
                                             onChange={field.onChange}
                                             error={fieldState.error?.message}
-                                            label={"AVS Submit Contract"}
+                                            label={"FeeShareAVS contract"}
                                         />
                                     )} />
                                 </div>

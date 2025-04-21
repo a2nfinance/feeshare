@@ -122,6 +122,11 @@ const data = {
   ],
   projects: [
     {
+      name: "Incentive Programs",
+      url: "#",
+      icon: Map,
+    },
+    {
       name: "Public DAOs",
       url: "/daos",
       icon: PieChart
@@ -136,12 +141,7 @@ const data = {
       url: "/new-dao",
       icon: Frame,
     },
-    
-    {
-      name: "Incentive Programs",
-      url: "#",
-      icon: Map,
-    },
+ 
   ],
 }
 

@@ -8,7 +8,7 @@ import ProposalVotingCard from "./ProposalVotingCard";
 
 
 export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolean, setOpen: (open: boolean) => void, proposalDetail: any }) => {
-    if (!proposalDetail) return <div className="p-4 text-gray-500">Loading...</div>;
+    if (!proposalDetail) return <div className="p-4 text-gray-500"></div>;
 
 
     const fieldComponent = (value: string | number | object) => {
@@ -45,6 +45,7 @@ export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolea
                 <ProposalVotingCard
                     daoId={proposalDetail?.dao_id}
                     proposalDBId={proposalDetail?._id}
+                    params={proposalDetail?.params}
                     proposalId={proposalDetail?.onchain_id}
                     contractAddress={proposalDetail?.dao_address} />
                 <Separator title="Params" />

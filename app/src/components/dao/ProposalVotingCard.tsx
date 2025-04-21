@@ -16,12 +16,13 @@ import { useAccount, useReadContract, useWriteContract } from "wagmi";
 
 type ProposalVotingCardProps = {
     proposalDBId: string,
+    params: any,
     proposalId: number;
     contractAddress: `0x${string}`;
     daoId: string
 };
 
-export default function ProposalVotingCard({proposalDBId, proposalId, contractAddress, daoId }: ProposalVotingCardProps) {
+export default function ProposalVotingCard({proposalDBId, params, proposalId, contractAddress, daoId }: ProposalVotingCardProps) {
     const [isVoting, setIsVoting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { address, chainId } = useAccount()
@@ -120,11 +121,13 @@ export default function ProposalVotingCard({proposalDBId, proposalId, contractAd
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         creator: address,
+                        title: params.title,
                         dao_address: contractAddress,
                         program_address: programContract,
                         reward_address: rewardContract,
                         dao_id: daoId,
                         proposal_id: proposalDBId,
+                        params: params
                     })
                 })
                 let res = await req.json();
