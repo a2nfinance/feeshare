@@ -6,6 +6,10 @@ let program = new Schema({
         type: String,
         require: true
     },
+    title: {
+        type: String,
+        require: true
+    },
     program_address: {
         type: String,
         require: true
@@ -24,6 +28,10 @@ let program = new Schema({
     },
     proposal_id: {
         type: String,
+        require: true
+    },
+    params: {
+        type: Object,
         require: true
     },
     created_at: {
