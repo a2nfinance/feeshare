@@ -1,8 +1,7 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import AddressDisplay from "../common/AddressDisplay"
-import { Button } from "../ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { ApplyToProgram } from "./ApplyToProgram"
 
@@ -66,7 +65,7 @@ export const ProgramInfo = ({ dao, program }: { dao: any, program: any }) => {
             <div className="space-y-1">
                 <h4>Program Title:</h4>
                 <div className="text-sm text-gray-400">
-                    {program?.title}
+                    {program.title}
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 space-x-2">

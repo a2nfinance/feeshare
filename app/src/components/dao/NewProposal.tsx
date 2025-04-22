@@ -80,7 +80,8 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
             rewardType: "fixed",
             fixedRewardPercentage: 5,
             rewardRules: [{ amount: 1, percentage: 10 }],
-            amount: 0.001
+            amount: 0.001,
+            title: ""
         }
     });
 
@@ -177,10 +178,13 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                     } else if (data.type === "incentive") {
                         params = {
                             ...params, 
+                            title: data.title,
                             rewardType: data.rewardType, 
                             rewardRules: data.rewardRules, 
                             fixedRewardPercentage: data.fixedRewardPercentage,
-                            avsSubmitContract: data.avsSubmitContract
+                            avsSubmitContract: data.avsSubmitContract,
+                            startDate: data.startDate,
+                            endDate: data.endDate
                         }
                     }
                     let req = await fetch("/api/proposal", {
@@ -288,7 +292,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                                 <FormField name="title" control={form.control} render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Title</FormLabel>
-                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                        <FormControl><Input  {...field} /></FormControl>
                                     </FormItem>
                                 )} />
                                 <div className='grid grid-cols-2 gap-4 items-center'>

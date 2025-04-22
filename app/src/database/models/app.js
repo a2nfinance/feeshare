@@ -6,6 +6,10 @@ let app = new Schema({
         type: String,
         require: true
     },
+    onchain_app_id: {
+        type: Number,
+        require: true,
+    },
     application_name: {
         type: String,
         require: true

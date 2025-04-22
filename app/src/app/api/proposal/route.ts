@@ -45,10 +45,10 @@ export async function PUT(req: NextRequest) {
 
         await connectToDatabase();
 
-        Proposal.findByIdAndUpdate(body._id, {status: body.status})
-     
+        await Proposal.findByIdAndUpdate(body._id, {status: body.status})
+        console.log("Updated proposal!")
         return NextResponse.json(
-            {success: true, proposalId: body._id}
+            {success: true, proposalId: body._id, status: body.status}
         );
     } catch (error) {
         return NextResponse.json(

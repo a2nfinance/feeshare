@@ -1,5 +1,6 @@
 import { DAOInfo } from "@/components/dao/DAOInfo";
 import { ProgramInfo } from "@/components/program/ProgramInfo";
+import { WhitelistedApplication } from "@/components/program/WhitelistedApplication";
 import connectToDatabase from "@/database/connect";
 import DAO from "@/database/models/dao";
 import Program from "@/database/models/program";
@@ -31,6 +32,8 @@ export default async function ProgramDetailPage({ params }: Params) {
             <ProgramInfo 
             dao={ data.dao }
             program={data.program} />
+
+            <WhitelistedApplication program={data.program} />
         </div>
     );
 }

@@ -181,7 +181,7 @@ export function ApplyToProgram({ dao_address, program_address, dao_id }: { dao_a
     return (
         <Dialog open={open} onOpenChange={setOpen} modal={true}>
             <DialogTrigger asChild>
-                <Button className='w-full'>Propose Application</Button>
+                <Button className='w-full'>Propose My Application</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>

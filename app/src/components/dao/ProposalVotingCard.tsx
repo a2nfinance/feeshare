@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { abi } from "@/lib/abi/DAO.json";
 import { abi as ProgramFactoryABI } from "@/lib/abi/ProgramFactory.json";
+import { abi as ProgramABI } from "@/lib/abi/Program.json";
 import { config } from "@/lib/wagmi";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -28,33 +29,14 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
     const [isVoting, setIsVoting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { address, chainId } = useAccount()
-    const { data: memberCount } = useReadContract({
+    const { data: dt, refetch, isLoading, error }: { data: any, refetch: any, isLoading: boolean, error: any } = useReadContract({
         address: contractAddress,
         abi,
-        functionName: "getMemberCount",
-    });
-
-    const { data: quorum } = useReadContract({
-        address: contractAddress,
-        abi,
-        functionName: "quorum",
-    });
-
-    const { data: votingThreshold } = useReadContract({
-        address: contractAddress,
-        abi,
-        functionName: "votingThreshold",
-    });
-    const { data: proposal }: { data: any } = useReadContract({
-        address: contractAddress,
-        abi,
-        functionName: "proposals",
-        args: [proposalId],
+        functionName: "getVotingStatus",
+        args: [proposalId]
     });
 
     const { writeContractAsync } = useWriteContract();
-
-
 
     const handleVote = async (support: boolean) => {
         try {
@@ -71,7 +53,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
             await waitForTransactionReceipt(config.getClient(chainId), {
                 hash: tx,
             });
-
+            await refetch()
         } catch (err: any) {
             if (err instanceof BaseError) {
                 toast.error(`Error: ${err.shortMessage}`)
@@ -165,37 +147,46 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                     toast.success("The proposal was executed successful!")
                 }
             } else if (proposalType === "applyprogram") {
-                await fetch("/api/proposal", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        status: "executed",
-                        _id: proposalDBId,
+                const logs: any[] = parseEventLogs({
+                    abi: ProgramABI,
+                    eventName: 'WhitelistedAppContractsAdded',
+                    logs: receipt.logs,
+                });
+                if (logs.length > 0) {
+                    const { appId, contracts } = logs[0].args;
+                    await fetch("/api/proposal", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            status: "executed",
+                            _id: proposalDBId,
+                        })
                     })
-                })
 
 
-                let req = await fetch("/api/application", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        creator: creator,
-                        application_name: params.applicationName,
-                        program_address: params.targetContract,
-                        dao_address: contractAddress,
-                        dao_id: daoId,
-                        proposal_id: proposalDBId,
-                        params: params
+                    let req = await fetch("/api/application", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            creator: creator,
+                            onchain_app_id: parseInt(appId),
+                            application_name: params.applicationName,
+                            program_address: params.targetContract,
+                            dao_address: contractAddress,
+                            dao_id: daoId,
+                            proposal_id: proposalDBId,
+                            params: params
+                        })
                     })
-                })
-                let res = await req.json();
-                if (res.success) {
-                    toast.success("The proposal was executed successful!")
+                    let res = await req.json();
+                    if (res.success) {
+                        toast.success("The proposal was executed successful!")
+                    }
                 }
             }
 
 
-
+            await refetch()
         } catch (err: any) {
             if (err instanceof BaseError) {
                 toast.error(`Error: ${err.shortMessage}`)
@@ -216,13 +207,13 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                 {/* Section 1: Member info */}
                 <div className="grid grid-cols-3 gap-4 text-center">
                     <Badge variant="outline" className="bg-blue-100 text-blue-600">
-                        Members: {memberCount?.toString() || 0}
+                        Members: {dt?.[0]?.toString() || 0}
                     </Badge>
                     <Badge variant="outline" className="bg-green-100 text-green-600">
-                        Quorum: {quorum?.toString() || 0}
+                        Quorum: {parseInt(dt?.[1]?.toString() || 0) / 100}%
                     </Badge>
                     <Badge variant="outline" className="bg-yellow-100 text-yellow-600">
-                        Threshold: {votingThreshold?.toString() || 0}
+                        Threshold: {parseInt(dt?.[2]?.toString() || 0) / 100}%
                     </Badge>
                 </div>
 
@@ -230,25 +221,25 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                 <div className="flex justify-around text-center mt-4">
                     <div>
                         <p className="text-sm text-muted-foreground">Votes For</p>
-                        <p className="text-lg font-bold text-green-600">{proposal?.totalVotesFor?.toString() || 0}</p>
+                        <p className="text-lg font-bold text-green-600">{dt?.[3]?.totalVotesFor?.toString() || 0}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">Votes Against</p>
-                        <p className="text-lg font-bold text-red-600">{proposal?.totalVotesAgainst?.toString() || 0}</p>
+                        <p className="text-lg font-bold text-red-600">{dt?.[3]?.totalVotesAgainst?.toString() || 0}</p>
                     </div>
                 </div>
 
                 {/* Section 3: Buttons */}
                 <div className="flex justify-center gap-6 mt-4">
                     <Button
-                        disabled={isVoting}
+                        disabled={isVoting || dt?.[3]?.executed}
                         onClick={() => handleVote(true)}
                         className="bg-green-600 hover:bg-green-700 text-white"
                     >
                         Support
                     </Button>
                     <Button
-                        disabled={isVoting}
+                        disabled={isVoting || dt?.[3]?.executed}
                         onClick={() => handleVote(false)}
                         className="bg-red-600 hover:bg-red-700 text-white"
                     >
@@ -256,7 +247,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                     </Button>
 
                     <Button
-                        disabled={isProcessing}
+                        disabled={isProcessing || !dt?.[4] || dt?.[3]?.executed}
                         onClick={() => handleExecuteProposal()}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
