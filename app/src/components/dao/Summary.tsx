@@ -108,10 +108,10 @@ export const Summary = ({ summary }: { summary: any }) => {
                     {
                         summary.members.map((t: {address: string, weight: number}, k: number) => {
 
-                            return <>
-                                <AddressDisplay key={`member-${k}`} address={t.address} /> 
+                            return <div key={`member-${k}`}>
+                                <AddressDisplay  address={t.address} /> 
                                 <Badge className="ml-2">{t.weight}</Badge>
-                            </>
+                            </div>
                         })
                     }
 

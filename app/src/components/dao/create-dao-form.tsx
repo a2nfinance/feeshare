@@ -29,7 +29,7 @@ const formSchema = z.object({
     daoAllowEarlierExecution: z.boolean(),
     initialWhitelistedTokens: z.string().array(),
     initialWhitelistedFunders: z.string().array(),
-    members:  z.array(
+    members: z.array(
         z.object({
             address: z.coerce.string(),
             weight: z.coerce.number()
@@ -57,7 +57,7 @@ export default function CreateDAOForm() {
             daoAllowEarlierExecution: true,
             initialWhitelistedTokens: [''],
             initialWhitelistedFunders: [''],
-            members: [{address: "", weight: 1}]
+            members: [{ address: "", weight: 1 }]
         },
         mode: "onChange"
     });
@@ -170,14 +170,34 @@ export default function CreateDAOForm() {
     };
 
     const summary = form.getValues();
+    const getStepTitle = (stepNumber: number) => {
+        let title = "Enter you organization information."
+        switch (stepNumber) {
+            case 1:
+                title = "Change your voting settings";
+                break;
+            case 2:
+                title = "Only whitelisted funders can fund treasury contracts using native token and whitelisted tokens";
+                break;
+            case 3:
+                title = "Members have high weight will have more voting power";
+                break;
+            case 4:
+                title = "DAO creation detailed params";
+                break;
+            default:
+                break;
+        }
 
+        return title;
+    }
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className='lg:col-span-2 '>
                 <CardHeader>
                     <CardTitle className="text-2xl">Step {step + 1}</CardTitle>
                     <CardDescription>
-                        Enter you organization information.
+                        {getStepTitle(step)}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -453,7 +473,7 @@ export default function CreateDAOForm() {
                                                     type="button"
                                                     variant="outline"
                                                     className="mt-2"
-                                                    onClick={() => membersAppend({address: "", weight: 1})}
+                                                    onClick={() => membersAppend({ address: "", weight: 1 })}
                                                 >
                                                     Add members
                                                 </Button>
@@ -469,7 +489,7 @@ export default function CreateDAOForm() {
                             {/* Step 4: Confirm */}
                             {step === 4 && (
                                 <div>
-                                    <p className="text-lg font-bold mb-2">DAO Information Confirmation</p>
+                                    {/* <p className="text-lg font-bold mb-2">DAO Information Confirmation</p> */}
                                     <pre className="bg-muted text-sm rounded p-4 overflow-x-auto">
                                         {JSON.stringify(summary, null, 2)}
                                     </pre>

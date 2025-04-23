@@ -228,7 +228,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                                 {...field}
                                                 className="w-full border rounded px-3 py-2 bg-background"
                                             >
-                                                <option value="applyprogram">Whitelisted App Propose</option>
+                                                <option value="applyprogram">Propose My Application</option>
                                             </select>
                                         </FormControl>
                                     </FormItem>

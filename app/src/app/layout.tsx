@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FeeShare AVS",
-  description: "Create Incentive Programs for EcoSystem Growth Up",
+  title: "FeeShare Platform",
+  description: "Manage Incentive Programs for Ecosystem Growth",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body
-        className={` antialiased`}
+        className={`antialiased`}
       >
         <ThemeProvider
           attribute="class"

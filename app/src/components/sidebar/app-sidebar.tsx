@@ -116,8 +116,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <img src="/logo/icon.png" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">FeeShare AVS</span>
-                  <span className="truncate text-xs">SwellChain</span>
+                  <span className="truncate font-semibold">FeeShare Platform</span>
+                  <span className="truncate text-xs">SwellChain & EigenLayer AVS</span>
                 </div>
               </a>
             </SidebarMenuButton>
