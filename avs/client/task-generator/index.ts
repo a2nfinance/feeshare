@@ -9,6 +9,7 @@ const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
 /// TODO: Hack
 let chainId = process.env.CHAIN_ID;
+let APP_API_URL = process.env.APP_API_URL;
 
 const avsDeploymentData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../contracts/deployments/fee-share/${chainId}.json`), 'utf8'));
 const feeShareServiceManagerAddress = avsDeploymentData.addresses.feeShareServiceManager;
@@ -20,15 +21,16 @@ const feeshareServiceManager = new ethers.Contract(feeShareServiceManagerAddress
 const INTERVAL = 10000;
 const PREVIOUS_BLOCK_NUM = INTERVAL / 2000;
 
-interface Task {
+export interface Task {
   rewardContractAddress: string;
   appIds: number[],
   fromBlockNum: number,
-  toBlockNum: number
+  toBlockNum: number,
+  taskCreatedBlock?: number
 }
 
 async function getApps() {
-   let req = await fetch("http://172.20.96.1:3000/api/applications", {
+   let req = await fetch(`${APP_API_URL}/applications`, {
      method: "GET",
      headers: {"Content-Type": "application/context"},
 
@@ -86,9 +88,10 @@ async function createNewTask() {
 
 // Function to create a new task with a random name every 15 seconds
 function startCreatingTasks() {
-  setInterval(() => {
-    createNewTask();
-  }, INTERVAL);
+  createNewTask();
+  // setInterval(() => {
+  //   createNewTask();
+  // }, INTERVAL);
 }
 
 // Start the process
