@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { abi } from '@/lib/abi/DAOFactory.json';
 import { config } from '@/lib/wagmi';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Weight } from 'lucide-react';
 import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -29,7 +29,12 @@ const formSchema = z.object({
     daoAllowEarlierExecution: z.boolean(),
     initialWhitelistedTokens: z.string().array(),
     initialWhitelistedFunders: z.string().array(),
-    members: z.string().array(),
+    members:  z.array(
+        z.object({
+            address: z.coerce.string(),
+            weight: z.coerce.number()
+        })
+    ),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -49,10 +54,10 @@ export default function CreateDAOForm() {
             daoQuorum: 50,
             daoVotingThreshold: 50,
             daoOnlyMembersCanPropose: true,
-            daoAllowEarlierExecution: false,
+            daoAllowEarlierExecution: true,
             initialWhitelistedTokens: [''],
             initialWhitelistedFunders: [''],
-            members: ['']
+            members: [{address: "", weight: 1}]
         },
         mode: "onChange"
     });
@@ -110,12 +115,12 @@ export default function CreateDAOForm() {
                         data.daoAllowEarlierExecution,
                         data.initialWhitelistedTokens.map(i => i.trim().toLowerCase()),
                         data.initialWhitelistedFunders.map(i => i.trim().toLowerCase()),
-                        data.members.map(m => [getAddress(m.trim()), 1])
+                        data.members.map(m => [getAddress(m.address.trim()), m.weight])
                     ],
                 });
 
                 console.log('DAO Created TX:', tx);
-                
+
                 // @ts-ignore
                 const receipt = await waitForTransactionReceipt(config.getClient(chainId), {
                     hash: tx,
@@ -146,7 +151,7 @@ export default function CreateDAOForm() {
                     })
                     let res = await req.json();
                 }
-                
+
 
                 toast.success(`DAO & Treasury contracts were create successfull!`)
             }
@@ -172,7 +177,7 @@ export default function CreateDAOForm() {
                 <CardHeader>
                     <CardTitle className="text-2xl">Step {step + 1}</CardTitle>
                     <CardDescription>
-                        Enter your email below to login to your account
+                        Enter you organization information.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -187,7 +192,7 @@ export default function CreateDAOForm() {
                                         name="daoName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>DAO Name</FormLabel>
+                                                <FormLabel>Organization Name</FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
@@ -209,39 +214,42 @@ export default function CreateDAOForm() {
                                             </FormItem>
                                         )}
                                     />
+                                    <div className='grid grid-cols-1 md:grid-cols-2 space-x-2'>
+                                        <FormField
+                                            control={form.control}
+                                            name="daoXAccount"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>X Username</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} placeholder='E.g. @a2nfinance' />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="daoDiscordAccount"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Discord</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} placeholder='E.g. a2nfinance' />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
 
-                                    <FormField
-                                        control={form.control}
-                                        name="daoXAccount"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Farcaster / X username</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="daoDiscordAccount"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Discord</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
                                 </>
                             )}
 
                             {/* Step 1: Social */}
                             {step === 1 && (
                                 <>
+
                                     <FormField
                                         control={form.control}
                                         name="daoQuorum"
@@ -269,6 +277,7 @@ export default function CreateDAOForm() {
                                             </FormItem>
                                         )}
                                     />
+
 
                                     <FormField
                                         control={form.control}
@@ -340,7 +349,8 @@ export default function CreateDAOForm() {
                                                     type="button"
                                                     variant="outline"
                                                     className="mt-2"
-                                                    onClick={() => tokenAppend(" ")}
+                                                    //@ts-ignore
+                                                    onClick={() => tokenAppend("0x")}
                                                 >
                                                     Add Token
                                                 </Button>
@@ -369,6 +379,7 @@ export default function CreateDAOForm() {
                                                                     <FormControl>
                                                                         <Input placeholder="0x..." {...field} />
                                                                     </FormControl>
+
                                                                     <Button
                                                                         type="button"
                                                                         variant="ghost"
@@ -387,7 +398,8 @@ export default function CreateDAOForm() {
                                                     type="button"
                                                     variant="outline"
                                                     className="mt-2"
-                                                    onClick={() => funderAppend(" ")}
+                                                    //@ts-ignore
+                                                    onClick={() => funderAppend("0x")}
                                                 >
                                                     Add Funder
                                                 </Button>
@@ -407,30 +419,32 @@ export default function CreateDAOForm() {
                                         name="members"
                                         render={() => (
                                             <FormItem>
-                                                <FormLabel>Members</FormLabel>
+                                                <FormLabel></FormLabel>
 
                                                 {/* Render dynamic fields */}
                                                 <div className="space-y-2">
-                                                    {membersFields.map((field, index) => (
-                                                        <FormField
-                                                            key={field.id}
-                                                            control={form.control}
-                                                            name={`members.${index}`}
-                                                            render={({ field }) => (
-                                                                <div className="flex gap-2 items-center">
-                                                                    <FormControl>
-                                                                        <Input placeholder="0x..." {...field} />
-                                                                    </FormControl>
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="ghost"
-                                                                        onClick={() => membersRemove(index)}
-                                                                    >
-                                                                        Remove
-                                                                    </Button>
-                                                                </div>
-                                                            )}
-                                                        />
+                                                    {membersFields.map((fieldItem, index) => (
+                                                        <div key={fieldItem.id} className="grid grid-cols-3 gap-4 items-end">
+                                                            <FormField name={`members.${index}.address`} control={form.control} render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>{index === 0 ? "Address" : ""}</FormLabel>
+                                                                    <FormControl><Input {...field} /></FormControl>
+                                                                </FormItem>
+                                                            )} />
+                                                            <FormField name={`members.${index}.weight`} control={form.control} render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>{index === 0 ? "Weight" : ""}</FormLabel>
+                                                                    <FormControl><Input type="number" {...field} /></FormControl>
+                                                                </FormItem>
+                                                            )} />
+                                                            <Button
+                                                                type="button"
+                                                                variant="destructive"
+                                                                onClick={() => membersRemove(index)}
+                                                            >
+                                                                Remove
+                                                            </Button>
+                                                        </div>
                                                     ))}
                                                 </div>
 
@@ -439,7 +453,7 @@ export default function CreateDAOForm() {
                                                     type="button"
                                                     variant="outline"
                                                     className="mt-2"
-                                                    onClick={() => membersAppend(" ")}
+                                                    onClick={() => membersAppend({address: "", weight: 1})}
                                                 >
                                                     Add members
                                                 </Button>
@@ -455,7 +469,7 @@ export default function CreateDAOForm() {
                             {/* Step 4: Confirm */}
                             {step === 4 && (
                                 <div>
-                                    <p className="text-lg font-bold">DAO Information Confirmation</p>
+                                    <p className="text-lg font-bold mb-2">DAO Information Confirmation</p>
                                     <pre className="bg-muted text-sm rounded p-4 overflow-x-auto">
                                         {JSON.stringify(summary, null, 2)}
                                     </pre>

@@ -62,7 +62,7 @@ export const Programs = (
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <Link key={`button-${program._id}`} href={`/program/${program._id}`}>details</Link>
+                                    <Link key={`button-${program._id}`} href={`/programs/${program._id}`}>details</Link>
                                 </TableCell>
                             </TableRow>
                         ))}

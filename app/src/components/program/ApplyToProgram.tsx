@@ -191,7 +191,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <Separator title='General Information' />
+                        <Separator title='Application Information' />
                         <FormField
                             control={form.control}
                             name="name"
@@ -271,7 +271,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                             )} />
                         </div>
 
-                        <Separator title="Whitelisted Contract Addresses" />
+                        <Separator title="Contract Addresses" />
 
                         <FormField
                             control={form.control}
@@ -312,7 +312,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                         className="mt-2"
                                         onClick={() => append("0x0")}
                                     >
-                                        Add Token
+                                        Add Contract
                                     </Button>
 
                                     <FormMessage />

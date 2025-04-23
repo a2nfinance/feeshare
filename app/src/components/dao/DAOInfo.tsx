@@ -94,20 +94,23 @@ export const DAOInfo = ({ dao }: { dao: any }) => {
                         </div>
                     </div>
 
+                    <div className="space-y-1">
+                        <h4>Created Date:</h4>
+                        <div className="text-sm text-gray-400">
+                            {new Date(dao.created_at).toLocaleString()}
+                        </div>
+                    </div>
+
                 </div>
 
                 <Separator />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 space-x-2">
-
-                    <Button>Add Member</Button>
-                    <Button>Add Token</Button>
                     <FundTreasury dao_address={dao.dao_address} treasury_address={dao.treasury_address} />
+                    <Button variant={"secondary"}>Add Member</Button>
+                    <Button variant={"secondary"}>Add Token</Button>
+
                 </div>
-
-
-                
-
             </CardContent>
         </Card>
     )

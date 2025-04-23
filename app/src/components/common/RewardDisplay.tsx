@@ -18,6 +18,6 @@ export const RewardDisplay = ({rewardContractAddress, abi, onchainAppId}: {rewar
   
     return <>
     <Badge className="bg-green-500 w-full">Reward: { formatEther(reward ?? BigInt(0))} ETH</Badge>
-    <Button size={"sm"} variant={"secondary"} disabled={formatEther(reward ?? BigInt(0)) === "0"} className="w-full mt-2">Claim Reward</Button>
+    <Button size={"sm"} disabled={formatEther(reward ?? BigInt(0)) === "0"} className="w-full mt-2">Claim Reward</Button>
     </>
   }

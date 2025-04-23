@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
+
 import { useRouter } from 'next/navigation';
+import AddressDisplay from '@/components/common/AddressDisplay';
+import { Separator } from '@/components/ui/separator';
+
 
 type DAO = {
     _id: string;
@@ -12,7 +15,7 @@ type DAO = {
     dao_address: string;
     treasury_address: string;
     params: any;
-    createdAt: string;
+    created_at: any;
 };
 
 export default function DaoListPage() {
@@ -25,6 +28,7 @@ export default function DaoListPage() {
             .then(res => res.json())
             .then(data => {
                 setDaos(data.daos);
+                console.log(data.daos)
                 setLoading(false);
             });
     }, []);
@@ -38,30 +42,54 @@ export default function DaoListPage() {
                 <Card key={dao._id} className="hover:shadow-lg transition-shadow duration-300 ">
                     <CardHeader>
                         <CardTitle>{dao.params.daoName}</CardTitle>
-                        <CardDescription>{dao.params.daoDescription}</CardDescription>
+                        <CardDescription></CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-gray-600 mb-2"></p>
-                        <p className="text-xs text-gray-500">
-                            X: <a href={`https://twitter.com/${dao.params.daoXAccount.replace("@", "")}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-blue-500">@{dao.params.daoXAccount.replace("@", "")}
-                            </a>
-                        </p>
-                        {/* <p className="text-xs text-gray-500">
-              Discord: {dao.discordAccount}
-            </p>
-            <p className="text-xs text-gray-500 break-all">
-              Contract: {dao.contractAddress}
-            </p>
-            <p className="text-xs text-gray-500 break-all">
-              Treasury: {dao.treasuryAddress}
-            </p> */}
+
+                        <Separator />
+                        <div className="space-y-1">
+                            <h4>Description:</h4>
+                            <div className="text-sm text-gray-400">
+                                {
+                                    dao.params.daoDescription
+                                }
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 space-y-2">
+                            <div className="space-y-1">
+                                <h4>X Account:</h4>
+                                <div className="text-sm text-gray-400">
+                                    {
+                                        dao.params.daoXAccount
+                                    }
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h4>Discord Account:</h4>
+                                <div className="text-sm text-gray-400">
+                                    {
+                                        dao.params.daoDiscordAccount
+                                    }
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h4>DAO Address:</h4>
+                                <div className="text-sm text-gray-400">
+                                    <AddressDisplay address={dao.dao_address} />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h4>Treasury Address:</h4>
+                                <div className="text-sm text-gray-400">
+                                    <AddressDisplay address={dao.treasury_address} />
+                                </div>
+                            </div>
+                        </div>
+                        <Separator />
                     </CardContent>
                     <CardFooter>
-                        <Button className="w-full" onClick={() => router.push(`/dao/${dao._id}`)}>
-                            <Check /> View Details
+                        <Button className="w-full" onClick={() => router.push(`/daos/${dao._id}`)}>
+                            View Details
                         </Button>
                     </CardFooter>
                 </Card>

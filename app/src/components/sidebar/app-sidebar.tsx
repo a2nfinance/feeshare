@@ -2,12 +2,21 @@
 
 import {
   Bot,
+  Building,
+  Building2,
   Frame,
+  GiftIcon,
+  GitBranchIcon,
   LifeBuoy,
+  LinkIcon,
   Map,
   PieChart,
+  Plus,
   Send,
-  SquareTerminal
+  SendIcon,
+  SquareTerminal,
+  TwitterIcon,
+  XIcon
 } from "lucide-react"
 import * as React from "react"
 
@@ -57,85 +66,39 @@ const data = {
       url: "#",
       icon: Bot,
     },
-    // {
-    //   title: "Documentation",
-    //   url: "#",
-    //   icon: BookOpen,
-    //   items: [
-    //     {
-    //       title: "Introduction",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Get Started",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Tutorials",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Changelog",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: Settings2,
-    //   items: [
-    //     {
-    //       title: "General",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Team",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Billing",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Limits",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
   ],
   navSecondary: [
     {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
+      title: "Github",
+      url: "https://github.com/a2nfinance/feeshare",
+      icon: GitBranchIcon,
     },
     {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
+      title: "Telegram",
+      url: "/",
+      icon: SendIcon,
     },
   ],
   projects: [
     {
       name: "Incentive Programs",
-      url: "#",
-      icon: Map,
+      url: "/programs",
+      icon: GiftIcon,
     },
     {
-      name: "Public DAOs",
+      name: "Organizations",
       url: "/daos",
-      icon: PieChart
+      icon: Building2
     },
     {
       name: "My DAOs",
       url: "/my-daos",
-      icon: SquareTerminal,
+      icon: Building,
     },
     {
       name: "New DAO",
       url: "/new-dao",
-      icon: Frame,
+      icon: Plus,
     },
  
   ],
@@ -150,9 +113,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary-foreground text-sidebar-primary-foreground">
-                  {/* <Avatar>
-                    <AvatarImage src="/logo/icon.png" />
-                  </Avatar> */}
                   <img src="/logo/icon.png" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">

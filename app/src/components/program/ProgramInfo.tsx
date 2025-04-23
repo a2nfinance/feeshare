@@ -82,7 +82,7 @@ export const ProgramInfo = ({ dao, program }: { dao: any, program: any }) => {
                     program.params?.rewardType === "fixed" && <div className="space-y-1">
                         <h4>Reward Percentage:</h4>
                         <div className="text-sm text-gray-400">
-                            {program.params?.rewardType}
+                            {program.params?.fixedRewardPercentage}
                         </div>
                     </div>
                 }
