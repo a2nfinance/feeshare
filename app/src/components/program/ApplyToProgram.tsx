@@ -52,7 +52,7 @@ const proposalSchema = z.object({
 
 type ProposalFormValues = z.infer<typeof proposalSchema>;
 
-export function ApplyToProgram({ dao_address, program_address, dao_id }: { dao_address: string, program_address: string, dao_id: string }) {
+export function ApplyToProgram({ dao_address, program_address, reward_address, dao_id }: { dao_address: string, program_address: string, reward_address: string, dao_id: string }) {
     const { address, chainId } = useAccount()
     const [open, setOpen] = useState(false);
     const [createProposalProcessing, setCreateProposalProcessing] = useState(false)
@@ -147,6 +147,7 @@ export function ApplyToProgram({ dao_address, program_address, dao_id }: { dao_a
                         body: JSON.stringify({
                             creator: address,
                             onchain_id: parseInt(proposalId),
+                            reward_address: reward_address,
                             dao_id: dao_id,
                             duration_in_days: data.durationInDays,
                             proposal_type: data.type,

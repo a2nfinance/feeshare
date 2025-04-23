@@ -72,9 +72,6 @@ export const WhitelistedApplication = ({ program }: { program: any }) => {
 
                                 <Separator />
                                 <RewardDisplay rewardContractAddress={program.reward_address} onchainAppId={app.onchain_app_id} abi={abi} />
-
-                                
-
                             </CardContent>
                         </Card>
                     )

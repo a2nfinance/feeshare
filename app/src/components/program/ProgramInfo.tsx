@@ -128,7 +128,7 @@ export const ProgramInfo = ({ dao, program }: { dao: any, program: any }) => {
                 
             </div>
             <Separator />
-            <ApplyToProgram dao_address={dao.dao_address} program_address={program.program_address} dao_id={dao._id} />
+            <ApplyToProgram dao_address={dao.dao_address} reward_address={program.reward_address} program_address={program.program_address} dao_id={dao._id} />
 
 
         </CardContent>

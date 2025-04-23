@@ -80,6 +80,16 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                 hash: tx,
             });
 
+
+            await fetch("/api/proposal", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    status: "executed",
+                    _id: proposalDBId,
+                })
+            })
+
             if (proposalType === "incentive") {
                 const logs: any[] = parseEventLogs({
                     abi: ProgramFactoryABI,
@@ -87,18 +97,8 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                     logs: receipt.logs,
                 });
 
-
                 if (logs.length > 0) {
                     const { programContract, rewardContract } = logs[0].args;
-                    // Update proposal
-                    await fetch("/api/proposal", {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            status: "executed",
-                            _id: proposalDBId,
-                        })
-                    })
                     // Save program
                     let req = await fetch("/api/program", {
                         method: "POST",
@@ -120,15 +120,6 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                     }
                 }
             } else if (proposalType === "sendfund") {
-                await fetch("/api/proposal", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        status: "executed",
-                        _id: proposalDBId,
-                    })
-                })
-
 
                 let req = await fetch("/api/fund", {
                     method: "POST",
@@ -154,15 +145,6 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                 });
                 if (logs.length > 0) {
                     const { appId, contracts } = logs[0].args;
-                    await fetch("/api/proposal", {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            status: "executed",
-                            _id: proposalDBId,
-                        })
-                    })
-
 
                     let req = await fetch("/api/application", {
                         method: "POST",
@@ -200,9 +182,6 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
 
     return (
         <Card className="w-full mx-auto shadow-lg px-30">
-            {/* <CardHeader> */}
-            {/* <CardTitle className="text-xl">{proposal?.name || "Proposal"}</CardTitle> */}
-            {/* </CardHeader> */}
             <CardContent className="space-y-4">
                 {/* Section 1: Member info */}
                 <div className="grid grid-cols-3 gap-4 text-center">

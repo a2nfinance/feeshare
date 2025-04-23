@@ -31,6 +31,7 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { abi } from "@/lib/abi/DAO.json";
 import { abi as programABI } from "@/lib/abi/ProgramFactory.json";
 import { abi as TreasuryABI } from "@/lib/abi/Treasury.json";
+import { abi as RewardABI } from "@/lib/abi/Reward.json";
 import { config } from '@/lib/wagmi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -40,7 +41,7 @@ import { useAccount, useWriteContract } from 'wagmi';
 const proposalSchema = z.object({
     name: z.string().min(1),
     durationInDays: z.coerce.number().min(1),
-    type: z.enum(['incentive', 'sendfund']),
+    type: z.enum(['incentive', 'sendfund', "updateavscontract"]),
 
     // Incentive fields
     title: z.string().optional(),
@@ -132,7 +133,17 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                     ]
                 });
             }
-            
+
+            if (data.type === "updateavscontract") {
+                callData = encodeFunctionData({
+                    abi: RewardABI,
+                    functionName: 'updateAvsSubmitContractAddress',
+                    args: [
+                        data.avsSubmitContract
+                    ]
+                })
+            }
+
             if (dao_address && chainId) {
                 setCreateProposalProcessing(true);
                 const tx = await writeContractAsync({
@@ -166,25 +177,30 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                     const { proposalId, name, sender } = logs[0].args;
                     console.log(logs[0].args)
                     console.log('Proposal ID:', proposalId);
-                    
+
                     let params: any = {
-                        name: data.name, 
-                        durationInDays: data.durationInDays, 
+                        name: data.name,
+                        durationInDays: data.durationInDays,
                         type: data.type,
                         targetContract: data.targetContract
                     }
                     if (data.type === 'sendfund') {
-                        params = {...params, tokenAddress: data.tokenAddress, receiverAddress: data.receiverAddress, amount: data.amount}
+                        params = { ...params, tokenAddress: data.tokenAddress, receiverAddress: data.receiverAddress, amount: data.amount }
                     } else if (data.type === "incentive") {
                         params = {
-                            ...params, 
+                            ...params,
                             title: data.title,
-                            rewardType: data.rewardType, 
-                            rewardRules: data.rewardRules, 
+                            rewardType: data.rewardType,
+                            rewardRules: data.rewardRules,
                             fixedRewardPercentage: data.fixedRewardPercentage,
                             avsSubmitContract: data.avsSubmitContract,
                             startDate: data.startDate,
                             endDate: data.endDate
+                        }
+                    } else if (data.type === "updateavscontract") {
+                        params = {
+                            ...params,
+                            avsSubmitContract: data.avsSubmitContract,
                         }
                     }
                     let req = await fetch("/api/proposal", {
@@ -278,6 +294,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                                             >
                                                 <option value="incentive">Incentive Program</option>
                                                 <option value="sendfund">Send Fund</option>
+                                                <option value="updateavscontract">Update AVS for RewardContract</option>
                                             </select>
                                         </FormControl>
                                     </FormItem>
@@ -446,37 +463,70 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                             <>
                                 <Separator title='Funding Settings' />
                                 <div className='grid grid-cols-2 gap-4 items-center'>
-                                <FormField name="tokenAddress" control={form.control} defaultValue='0x0000000000000000000000000000000000000000' render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <AddressInput
-                                            //@ts-ignore
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            error={fieldState.error?.message}
-                                            label="Token address"
-                                        />
-                                    </FormItem>
-                                )} />
-                                <FormField name="receiverAddress" defaultValue={address} control={form.control} render={({ field, fieldState }) => (
-                                    <FormItem>
-                                        <AddressInput
-                                            //@ts-ignore
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            error={fieldState.error?.message}
-                                            label="Beneficiary Address"
-                                        />
-                                    </FormItem>
-                                )} />
+                                    <FormField name="tokenAddress" control={form.control} defaultValue='0x0000000000000000000000000000000000000000' render={({ field, fieldState }) => (
+                                        <FormItem>
+                                            <AddressInput
+                                                //@ts-ignore
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                error={fieldState.error?.message}
+                                                label="Token address"
+                                            />
+                                        </FormItem>
+                                    )} />
+                                    <FormField name="receiverAddress" defaultValue={address} control={form.control} render={({ field, fieldState }) => (
+                                        <FormItem>
+                                            <AddressInput
+                                                //@ts-ignore
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                error={fieldState.error?.message}
+                                                label="Beneficiary Address"
+                                            />
+                                        </FormItem>
+                                    )} />
 
                                 </div>
-                                
+
                                 <FormField name="amount" control={form.control} render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Amount</FormLabel>
                                         <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                                     </FormItem>
                                 )} />
+                            </>
+                        )}
+
+                        {type === 'updateavscontract' && (
+                            <>
+                                <Separator title='' />
+
+                                <div className='grid grid-cols-2 gap-4 items-center'>
+                                    <FormField name="targetContract" control={form.control} render={({ field, fieldState }) => (
+
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label="Reward Contract"
+                                        />
+                                    )} />
+
+                                    <FormField name="avsSubmitContract" control={form.control} render={({ field, fieldState }) => (
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label={"FeeShareAVS contract"}
+                                        />
+                                    )} />
+                                </div>
+
+
+
+
                             </>
                         )}
 

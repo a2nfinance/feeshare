@@ -10,6 +10,10 @@ let app = new Schema({
         type: Number,
         require: true,
     },
+    reward_address: {
+        type: String,
+        require: true
+    },
     application_name: {
         type: String,
         require: true
