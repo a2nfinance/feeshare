@@ -58,8 +58,23 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
         address beneficiary = program.beneficiaryApp(_appId);
         require(beneficiary != address(0), "Beneficiary address not set for this app.");
 
-        uint256 rewardAmount = rewardApp[_appId];
+        uint256 generatedFee = rewardApp[_appId];
+        uint256 rewardType = program.rewardType();
+        uint256 rewardAmount = 0;
 
+        Structs.Rule[] memory rules = program.getRewardRules();
+
+        if (rewardType == 0) {
+            rewardAmount = generatedFee * program.fixedRewardPercentage() / 100;
+        } else {
+            
+            for(uint256 i = 0; i < rules.length; i++) {
+                if (generatedFee >= rules[i].amount) {
+                    rewardAmount = generatedFee * rules[i].rewardPercentage / 100;
+                }
+            }
+        }
+        
         // Reset reward for this app
         rewardApp[_appId] = 0;
 

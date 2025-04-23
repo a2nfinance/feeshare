@@ -83,6 +83,20 @@ interface IProgram {
      */
     function isAppWhitelisted(uint256 _appId) external view returns (bool);
 
+    /**
+     * @dev Returns rule.
+     * @param _index The ID of the rule.
+     * @return Structs.Rule
+     */
+    function getRewardRule(uint256 _index) external view returns (Structs.Rule memory);
+
+    /**
+     * @dev Returns rewardRules.
+     * @return Structs.Rule[] memory
+     */
+    function getRewardRules() external view returns (Structs.Rule[] memory);
+
+
     // Events
     event RulesUpdated(uint256 fixedRewardPercentage);
     event WhitelistedAppContractsAdded(uint256 appId, address[] contracts);

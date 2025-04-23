@@ -264,7 +264,17 @@ contract Program is Ownable, IProgram {
         return false;
     }
 
+    /*
+    * @inheritdoc IProgram
+    */
     function getRewardRule(uint256 _index) public view returns (Structs.Rule memory) {
         return rewardRules[_index];
+    }
+
+    /*
+    * @inheritdoc IProgram
+    */
+    function getRewardRules() public view returns (Structs.Rule[] memory) {
+        return rewardRules;
     }
 }
