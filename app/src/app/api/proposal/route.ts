@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let obj = new Proposal(
+        const obj = new Proposal(
             body
         )
 
 
-        let savedProposal = await obj.save()
+        const savedProposal = await obj.save()
      
         return NextResponse.json(
             {success: true, proposalId: savedProposal._id}
@@ -46,7 +46,6 @@ export async function PUT(req: NextRequest) {
         await connectToDatabase();
 
         await Proposal.findByIdAndUpdate(body._id, {status: body.status})
-        console.log("Updated proposal!")
         return NextResponse.json(
             {success: true, proposalId: body._id, status: body.status}
         );

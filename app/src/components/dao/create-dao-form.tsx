@@ -6,10 +6,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { abi } from '@/lib/abi/DAOFactory.json';
+import DAOFactoryJSON from '@/lib/abi/DAOFactory.json';
 import { config } from '@/lib/wagmi';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Weight } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -18,6 +18,8 @@ import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useWriteContract } from 'wagmi';
 import { z } from 'zod';
 import { Summary } from './Summary';
+
+const abi = DAOFactoryJSON.abi;
 const formSchema = z.object({
     daoName: z.string().min(3),
     daoDescription: z.string().min(3),
@@ -139,7 +141,7 @@ export default function CreateDAOForm() {
                     console.log('Treasury Contract:', treasuryContract);
 
 
-                    let req = await fetch("/api/dao", {
+                    await fetch("/api/dao", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -149,7 +151,7 @@ export default function CreateDAOForm() {
                             params: data
                         })
                     })
-                    let res = await req.json();
+                    
                 }
 
 

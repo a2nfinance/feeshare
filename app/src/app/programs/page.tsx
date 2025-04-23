@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 async function getPrograms() {
     await connectToDatabase();
     const programs: any = await Program.find().lean();
-    let jsonObj = programs.map((p: any) => {
+    const jsonObj = programs.map((p: any) => {
         return { ...p, _id: p._id.toString() }
     })
     return jsonObj;

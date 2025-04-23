@@ -7,8 +7,9 @@ import { Button } from "../ui/button"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { abi as RewardABI } from "@/lib/abi/Reward.json";
+import RewardJSON from "@/lib/abi/Reward.json";
 import CongratulationModal from "./CongratulationModal"
+const RewardABI = RewardJSON.abi;
 export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId }: { rewardContractAddress: `0x${string}`, abi: any, onchainAppId: number }) => {
   const [showCongrats, setShowCongrats] = useState(false);
   const [claimRewardProcessing, setClaimRewardProcessing] = useState(false)
@@ -38,7 +39,7 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId }: { re
       console.log('DAO Created TX:', tx);
 
       // @ts-ignore
-      const receipt = await waitForTransactionReceipt(config.getClient(chainId), {
+      await waitForTransactionReceipt(config.getClient(chainId), {
         hash: tx,
       });
       setTxHash("aaaaa");

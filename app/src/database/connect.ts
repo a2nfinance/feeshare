@@ -6,7 +6,7 @@ if (!MONGODB_URI) {
   throw new Error('Please define the DATABASE_URL environment variable');
 }
 
-let cached = (global as any).mongoose || { conn: null, promise: null };
+const cached = (global as any).mongoose || { conn: null, promise: null };
 
 async function connectToDatabase() {
   if (cached.conn) return cached.conn;

@@ -20,21 +20,21 @@ import {
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useFieldArray, useForm } from 'react-hook-form';
 import { BaseError, encodeFunctionData, getAddress, parseEventLogs } from 'viem';
 import { z } from 'zod';
 import { AddressInput } from '../common/AddressInput';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
-import { abi } from "@/lib/abi/DAO.json";
-import { abi as programABI } from "@/lib/abi/Program.json";
+import DAOJSON from "@/lib/abi/DAO.json";
+import ProgramJSON from "@/lib/abi/Program.json";
 import { config } from '@/lib/wagmi';
-import { BinocularsIcon, DeleteIcon, Loader2, RecycleIcon, RemoveFormattingIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useWriteContract } from 'wagmi';
+const DAOABI = DAOJSON.abi;
+const programABI = ProgramJSON.abi;
 
 const proposalSchema = z.object({
     name: z.string(),
@@ -98,7 +98,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
             if (dao_address && chainId) {
                 setCreateProposalProcessing(true);
                 const tx = await writeContractAsync({
-                    abi,
+                    abi: DAOABI,
                     address: getAddress(dao_address),
                     functionName: 'createProposal',
                     args: [
@@ -118,18 +118,18 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
 
 
                 const logs: any[] = parseEventLogs({
-                    abi,
+                    abi: DAOABI,
                     eventName: 'ProposalCreated',
                     logs: receipt.logs,
                 });
 
 
                 if (logs.length > 0) {
-                    const { proposalId, name, sender } = logs[0].args;
+                    const { proposalId } = logs[0].args;
                     console.log(logs[0].args)
                     console.log('Proposal ID:', proposalId);
 
-                    let params: any = {
+                    const params: any = {
                         name: data.name,
                         durationInDays: data.durationInDays,
                         type: data.type,
@@ -141,7 +141,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                         whitelistedAppContracts: data.whitelistedAppContracts
                     }
 
-                    let req = await fetch("/api/proposal", {
+                    const req = await fetch("/api/proposal", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -155,7 +155,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                             params: params
                         })
                     })
-                    let res = await req.json();
+                    const res = await req.json();
 
                     if (res.success) {
                         toast.success(`Proposal was created successfull!`);
@@ -287,7 +287,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                                 key={field.id}
                                                 control={form.control}
                                                 name={`whitelistedAppContracts.${index}`}
-                                                render={({ field, fieldState }) => (
+                                                render={({ field }) => (
                                                     <div className="flex gap-2 items-center">
                                                         <FormControl>
                                                             <Input placeholder="0x..." {...field} />

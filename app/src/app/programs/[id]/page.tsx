@@ -1,4 +1,3 @@
-import { DAOInfo } from "@/components/dao/DAOInfo";
 import { ProgramInfo } from "@/components/program/ProgramInfo";
 import { WhitelistedApplication } from "@/components/program/WhitelistedApplication";
 import connectToDatabase from "@/database/connect";

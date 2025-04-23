@@ -3,9 +3,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { abi } from "@/lib/abi/DAO.json";
-import { abi as ProgramFactoryABI } from "@/lib/abi/ProgramFactory.json";
-import { abi as ProgramABI } from "@/lib/abi/Program.json";
+import DAOJSON from "@/lib/abi/DAO.json";
+import ProgramFactoryJSON from "@/lib/abi/ProgramFactory.json";
+import ProgramJSON from "@/lib/abi/Program.json";
 import { config } from "@/lib/wagmi";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -14,6 +14,9 @@ import { BaseError, parseEventLogs } from "viem";
 import { waitForTransactionReceipt } from "viem/actions";
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 
+const abi = DAOJSON.abi;
+const ProgramFactoryABI = ProgramFactoryJSON.abi;
+const ProgramABI = ProgramJSON.abi;
 
 type ProposalVotingCardProps = {
     proposalDBId: string,
@@ -29,7 +32,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
     const [isVoting, setIsVoting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { address, chainId } = useAccount()
-    const { data: dt, refetch, isLoading, error }: { data: any, refetch: any, isLoading: boolean, error: any } = useReadContract({
+    const { data: dt, refetch}: { data: any, refetch: any, isLoading: boolean, error: any } = useReadContract({
         address: contractAddress,
         abi,
         functionName: "getVotingStatus",
@@ -100,7 +103,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                 if (logs.length > 0) {
                     const { programContract, rewardContract } = logs[0].args;
                     // Save program
-                    let req = await fetch("/api/program", {
+                    const req = await fetch("/api/program", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -114,14 +117,14 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                             params: params
                         })
                     })
-                    let res = await req.json();
+                    const res = await req.json();
                     if (res.success) {
                         toast.success("The proposal was executed successful!")
                     }
                 }
             } else if (proposalType === "sendfund") {
 
-                let req = await fetch("/api/fund", {
+                const req = await fetch("/api/fund", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -133,7 +136,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                         params: params
                     })
                 })
-                let res = await req.json();
+                const res = await req.json();
                 if (res.success) {
                     toast.success("The proposal was executed successful!")
                 }
@@ -144,9 +147,9 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                     logs: receipt.logs,
                 });
                 if (logs.length > 0) {
-                    const { appId, contracts } = logs[0].args;
+                    const { appId } = logs[0].args;
 
-                    let req = await fetch("/api/application", {
+                    const req = await fetch("/api/application", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -160,7 +163,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                             params: params
                         })
                     })
-                    let res = await req.json();
+                    const res = await req.json();
                     if (res.success) {
                         toast.success("The proposal was executed successful!")
                     }

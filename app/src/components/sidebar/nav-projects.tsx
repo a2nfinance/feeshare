@@ -9,8 +9,7 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar
+  SidebarMenuItem
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 
@@ -23,7 +22,7 @@ export function NavProjects({
     icon: LucideIcon
   }[]
 }) {
-  const { isMobile } = useSidebar()
+
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">

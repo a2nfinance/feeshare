@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let objs = await App.find({program_address: body.program_address}).sort({"created_at": "desc"});
+        const objs = await App.find({program_address: body.program_address}).sort({"created_at": "desc"});
 
      
         return NextResponse.json(
@@ -29,11 +29,11 @@ export async function POST(req: NextRequest) {
 }
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
 
     try {
         await connectToDatabase();
-        let objs = await App.find().sort({"created_at": "desc"});
+        const objs = await App.find().sort({"created_at": "desc"});
         return NextResponse.json(
             {success: true, apps: objs}
         );

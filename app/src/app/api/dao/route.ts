@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let daoobj = new DAO(
+        const daoobj = new DAO(
             body
         )
 
 
-        let savedDAO = await daoobj.save()
+        const savedDAO = await daoobj.save()
      
         return NextResponse.json(
             {success: true, daoId: savedDAO._id}

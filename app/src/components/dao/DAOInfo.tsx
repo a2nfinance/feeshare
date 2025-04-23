@@ -1,12 +1,12 @@
 "use client"
+import DAOJSON from "@/lib/abi/DAO.json"
 import { useReadContract } from "wagmi"
 import AddressDisplay from "../common/AddressDisplay"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
-import { Separator } from "../ui/separator"
-import { abi } from "@/lib/abi/DAO.json";
 import { Button } from "../ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
+import { Separator } from "../ui/separator"
 import { FundTreasury } from "./FundTreasury"
-
+const abi = DAOJSON.abi;
 export const DAOInfo = ({ dao }: { dao: any }) => {
 
     const { data: memberCount } = useReadContract({

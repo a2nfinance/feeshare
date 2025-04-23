@@ -1,7 +1,6 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { mainnet, swellchain, swellchainTestnet } from 'wagmi/chains';
-import { getPublicClient } from 'wagmi/actions';
 import { createPublicClient, http } from 'viem';
+import { mainnet, swellchain, swellchainTestnet } from 'wagmi/chains';
 
 const swellChainIconURL = "https://cdn.prod.website-files.com/6449b6fe52164e30db503746/66ff57f3aa9de72eae8aefd1_path-1-copy-48.svg";
 export const config = getDefaultConfig({

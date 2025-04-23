@@ -24,13 +24,13 @@ import { BaseError, getAddress, parseEther } from 'viem';
 import { z } from 'zod';
 import { AddressInput } from '../common/AddressInput';
 
-import { abi } from "@/lib/abi/IERC20.json";
+import IERC20JSON from "@/lib/abi/IERC20.json";
 import { config } from '@/lib/wagmi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { sendTransaction, waitForTransactionReceipt } from 'viem/actions';
+import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useSendTransaction, useWriteContract } from 'wagmi';
-
+const abi = IERC20JSON.abi;
 const fundSchema = z.object({
     // Send fund fields
     tokenAddress: z.string().optional(),
@@ -40,7 +40,7 @@ const fundSchema = z.object({
 type FundFormValues = z.infer<typeof fundSchema>;
 
 export function FundTreasury({ dao_address, treasury_address }: { dao_address: string, treasury_address: `0x${string}` }) {
-    const { address, chainId } = useAccount()
+    const { chainId } = useAccount()
     const [open, setOpen] = useState(false);
     const [fundProcessing, setFundProcessing] = useState(false)
     const { writeContractAsync } = useWriteContract();
@@ -81,7 +81,7 @@ export function FundTreasury({ dao_address, treasury_address }: { dao_address: s
                 console.log('Fund treasury TX:', tx);
 
                 // @ts-ignore
-                const receipt = await waitForTransactionReceipt(config.getClient(chainId), {
+                await waitForTransactionReceipt(config.getClient(chainId), {
                     hash: tx,
                 });
 

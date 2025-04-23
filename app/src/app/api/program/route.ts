@@ -14,12 +14,12 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let obj = new Program(
+        const obj = new Program(
             body
         )
 
 
-        let savedObj = await obj.save()
+        const savedObj = await obj.save()
      
         return NextResponse.json(
             {success: true, programId: savedObj._id}

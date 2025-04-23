@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useEffect, useState } from "react";
 
 export const FundingHistory = (
-    { dao_address, treasury_address, dao_id }: { dao_address: string, treasury_address: string, dao_id: string }
+    { dao_id }: { dao_id: string }
 ) => {
     const [funds, setFunds] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

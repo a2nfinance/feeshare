@@ -28,15 +28,20 @@ import { z } from 'zod';
 import { AddressInput } from '../common/AddressInput';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
-import { abi } from "@/lib/abi/DAO.json";
-import { abi as programABI } from "@/lib/abi/ProgramFactory.json";
-import { abi as TreasuryABI } from "@/lib/abi/Treasury.json";
-import { abi as RewardABI } from "@/lib/abi/Reward.json";
+import DAOJSON from "@/lib/abi/DAO.json";
+import ProgramFactoryJSON from "@/lib/abi/ProgramFactory.json";
+import RewardJSON from "@/lib/abi/Reward.json";
+import TreasuryJSON from "@/lib/abi/Treasury.json";
 import { config } from '@/lib/wagmi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { waitForTransactionReceipt } from 'viem/actions';
 import { useAccount, useWriteContract } from 'wagmi';
+
+const abi = DAOJSON.abi;
+const programABI = ProgramFactoryJSON.abi;
+const TreasuryABI = TreasuryJSON.abi;
+const RewardABI = RewardJSON.abi;
 
 const proposalSchema = z.object({
     name: z.string().min(1),
@@ -174,7 +179,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
 
 
                 if (logs.length > 0) {
-                    const { proposalId, name, sender } = logs[0].args;
+                    const { proposalId } = logs[0].args;
                     console.log(logs[0].args)
                     console.log('Proposal ID:', proposalId);
 
@@ -203,7 +208,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                             avsSubmitContract: data.avsSubmitContract,
                         }
                     }
-                    let req = await fetch("/api/proposal", {
+                    const req = await fetch("/api/proposal", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -216,7 +221,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                             params: params
                         })
                     })
-                    let res = await req.json();
+                    const res = await req.json();
 
                     if (res.success) {
                         toast.success(`Proposal was created successfull!`);

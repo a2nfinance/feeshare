@@ -1,19 +1,16 @@
 "use client"
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import NoData from "../common/NoData";
 import AddressDisplay from "../common/AddressDisplay";
+import NoData from "../common/NoData";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 
+import RewardJSON from "@/lib/abi/Reward.json";
 import { RewardDisplay } from "../common/RewardDisplay";
-import { abi } from "@/lib/abi/Reward.json"
 import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
-
+const abi = RewardJSON.abi;
 export const WhitelistedApplication = ({ program }: { program: any }) => {
     const [apps, setApps] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [openDialog, setOpenDialog] = useState(false)
-    const [selectedApp, setSelectedApp] = useState(null)
 
     function fetchApps() {
         setLoading(true);

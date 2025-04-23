@@ -8,9 +8,7 @@ import DAO from "@/database/models/dao";
 import mongoose from "mongoose";
 import { notFound } from "next/navigation";
 
-type Params = {
-  params: { id: string };
-};
+
 
 async function getDaoDetail(id: string) {
   await connectToDatabase();
@@ -18,9 +16,9 @@ async function getDaoDetail(id: string) {
   const dao = await DAO.findById(id).lean();
   return dao;
 }
-export default async function DaoDetailPage({ params }: Params) {
-  params = await params;
-  const dao: any = await getDaoDetail(params.id);
+export default async function DaoDetailPage({ params }: any) {
+  const { id } = await params;
+  const dao: any = await getDaoDetail(id);
 
   if (!dao) return notFound();
 
@@ -36,15 +34,15 @@ export default async function DaoDetailPage({ params }: Params) {
           <TabsTrigger value="funding">Funding History</TabsTrigger>
         </TabsList>
         <TabsContent value="proposals">
-          <Proposals dao_id={params.id} treasury_address={dao.treasury_address} dao_address={dao.dao_address} />
+          <Proposals dao_id={id} treasury_address={dao.treasury_address} dao_address={dao.dao_address} />
 
         </TabsContent>
 
         <TabsContent value="programs">
-          <Programs dao_id={params.id} treasury_address={dao.treasury_address} dao_address={dao.dao_address} />
+          <Programs dao_id={id} />
         </TabsContent>
         <TabsContent value="funding">
-          <FundingHistory dao_id={params.id} treasury_address={dao.treasury_address} dao_address={dao.dao_address} />
+          <FundingHistory dao_id={id}/>
         </TabsContent>
       </Tabs>
     </div>

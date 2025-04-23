@@ -4,19 +4,11 @@ import {
   Bot,
   Building,
   Building2,
-  Frame,
   GiftIcon,
   GitBranchIcon,
-  LifeBuoy,
-  LinkIcon,
-  Map,
-  PieChart,
   Plus,
-  Send,
   SendIcon,
-  SquareTerminal,
-  TwitterIcon,
-  XIcon
+  SquareTerminal
 } from "lucide-react"
 import * as React from "react"
 

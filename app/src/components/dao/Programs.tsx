@@ -2,14 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import Link from "next/link";
 
 export const Programs = (
-    { dao_address, treasury_address, dao_id }: { dao_address: string, treasury_address: string, dao_id: string }
+    {dao_id }: { dao_id: string }
 ) => {
     const [programs, setPrograms] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);

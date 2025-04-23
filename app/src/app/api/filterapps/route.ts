@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let objs = await App.find({reward_address: body.reward_address, "onchain_app_id": {$in: body.onchain_ids}}).sort({"created_at": "desc"});
+        const objs = await App.find({reward_address: body.reward_address, "onchain_app_id": {$in: body.onchain_ids}}).sort({"created_at": "desc"});
 
      
         return NextResponse.json(

@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
         await connectToDatabase();
 
-        let objs = await Fund.find({dao_id: body.dao_id}).sort({"created_at": "desc"});
+        const objs = await Fund.find({dao_id: body.dao_id}).sort({"created_at": "desc"});
 
      
         return NextResponse.json(
