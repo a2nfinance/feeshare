@@ -1,20 +1,30 @@
+'use client';
 import { SimpleProgramInfo } from "@/components/program/SimpleProgramInfo";
 import { Separator } from "@/components/ui/separator";
-import connectToDatabase from "@/database/connect";
-import Program from "@/database/models/program";
-import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
 
-async function getPrograms() {
-    await connectToDatabase();
-    const programs: any = await Program.find().lean();
-    const jsonObj = programs.map((p: any) => {
-        return { ...p, _id: p._id.toString() }
-    })
-    return jsonObj;
-}
-export default async function Programs() {
-    const data: any = await getPrograms();
-    if (!data) return notFound();
+export default function Programs() {
+    const [programs, setPrograms] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    function fetchPrograms() {
+        setLoading(true);
+        fetch('/api/programs', {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        })
+            .then(res => res.json())
+            .then(data => {
+                setPrograms(data.programs);
+                setLoading(false);
+            });
+    }
+
+    useEffect(() => {
+        fetchPrograms()
+    }, []);
+
+    if (loading) return <div className="p-4 text-gray-500">Loading...</div>;
 
     return (
         <div>
@@ -23,9 +33,9 @@ export default async function Programs() {
                 <p className="text-gray-400 mb-4">Develop your smart contracts and submit your application to any program to earn rewards based on the generated gas fees.</p>
                 <Separator />
             </div>
-           
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-                <SimpleProgramInfo programs={data} />
+                <SimpleProgramInfo programs={programs} />
             </div>
         </div>
     );

@@ -27,3 +27,24 @@ export async function POST(req: NextRequest) {
     
 }
 
+
+export async function GET() {
+
+    try {
+       
+        await connectToDatabase();
+
+        const objs = await Program.find().sort({"created_at": "desc"});
+
+        return NextResponse.json(
+            {success: true, programs: objs}
+        );
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, error: error instanceof Error ? error.message : error},
+        );
+    }
+    
+}
+
+
