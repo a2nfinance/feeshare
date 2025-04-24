@@ -120,6 +120,7 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
     if (totalGeneratedFee === BigInt(0)) {
         console.log("Generated gas fee is zero. Process complete.")
         console.log(`=======================================`)
+        return;
     }
     const abiCoder = new ethers.AbiCoder();
 
