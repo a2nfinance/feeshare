@@ -113,13 +113,13 @@ export const ProgramInfo = ({ dao, program }: { dao: any, program: any }) => {
 
 
                 <div className="space-y-1">
-                    <h4>Program Address:</h4>
+                    <h4>Program Contract:</h4>
                     <div className="text-sm text-gray-400">
                         <AddressDisplay address={program.program_address} />
                     </div>
                 </div>
                 <div className="space-y-1">
-                    <h4>Reward Address:</h4>
+                    <h4>Reward Contract:</h4>
                     <div className="text-sm text-gray-400">
                         <AddressDisplay address={program.reward_address} />
                     </div>

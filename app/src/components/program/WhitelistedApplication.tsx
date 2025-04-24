@@ -60,7 +60,7 @@ export const WhitelistedApplication = ({ program }: { program: any }) => {
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <h4>Benificiary Address:</h4>
+                                        <h4>Beneficiary Address:</h4>
                                         <div className="text-sm text-gray-400">
                                             <AddressDisplay address={app.params?.beneficiaryApp} />
                                         </div>
@@ -68,7 +68,7 @@ export const WhitelistedApplication = ({ program }: { program: any }) => {
                                 </div>
 
                                 <Separator />
-                                <RewardDisplay rewardContractAddress={program.reward_address} onchainAppId={app.onchain_app_id} abi={abi} />
+                                <RewardDisplay rewardContractAddress={program.reward_address} params={program.params} onchainAppId={app.onchain_app_id} abi={abi} />
                             </CardContent>
                         </Card>
                     )

@@ -10,7 +10,7 @@ import { toast } from "sonner"
 import RewardJSON from "@/lib/abi/Reward.json";
 import CongratulationModal from "./CongratulationModal"
 const RewardABI = RewardJSON.abi;
-export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId }: { rewardContractAddress: `0x${string}`, abi: any, onchainAppId: number }) => {
+export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params }: { rewardContractAddress: `0x${string}`, abi: any, onchainAppId: number, params: any }) => {
   const [showCongrats, setShowCongrats] = useState(false);
   const [claimRewardProcessing, setClaimRewardProcessing] = useState(false)
   const { writeContractAsync } = useWriteContract();
@@ -53,8 +53,25 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId }: { re
     }
     setClaimRewardProcessing(false)
   }
+
+  const calculateReward = (generatedFee: bigint) => {
+    let reward = BigInt(0);
+    if (params.rewardType === "fixed") {
+      if (generatedFee) {
+        reward = generatedFee * BigInt(params.fixedRewardPercentage) / BigInt(100);
+      } 
+    } else {
+      for(let i=0; i < params.rewardRules.length; i++) {
+        const rewardRule = params.rewardRules[i];
+        if (BigInt(rewardRule.amount) <= generatedFee) {
+            reward = generatedFee * BigInt(rewardRule.percentage) / BigInt(100)
+        }
+      }
+    }
+    return reward;
+  }
   return <>
-    <Badge className="bg-green-500 w-full">Generated Fee: {formatEther(reward ?? BigInt(0))} ETH</Badge>
+    <Badge className="bg-green-500 w-full">Estimated Reward: {formatEther(calculateReward(reward))} ETH</Badge>
     <Button size={"sm"} 
     disabled={formatEther(reward ?? BigInt(0)) === "0"} 
     className="w-full mt-2" onClick={() => claim()}>
