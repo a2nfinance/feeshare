@@ -87,18 +87,23 @@ const getGeneratedGasFee = async (contractAddress: string, fromBlockNum: number,
         }
     }
 
-    console.log(`Actual generated GasFee by contract ${contractAddress} from ${fromBlockNum} to ${fromBlockNum} is:`);
-    console.log(`${ethers.formatEther(totalGasFee)} ETH`);
+    // console.log(`Actual generated GasFee by contract ${contractAddress} from ${fromBlockNum} to ${toBlockNum} is:`);
+    console.log(`Calculating generated gas fee from block ${fromBlockNum} to block ${toBlockNum}.`);
+    // console.log(`${ethers.formatEther(totalGasFee)} ETH`);
     return totalGasFee
 }
 
 
 const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
+    console.log("Sign and Response Progress:")
+    console.log("Step 1: Retrieve whitelisted application information based on app IDs")
 
     const apps = await getAppsByIdsAndRewardAddress(taskobj.appIds, taskobj.rewardContractAddress);
 
     let generatedAppFee: bigint[] = [];
-    
+    let totalGeneratedFee = BigInt(0)
+
+    console.log("Step 2: Calculate generated gas fees using on-chain app IDs")
     for(let i = 0; i < apps.length; i++) {
         let app = apps[i];
         let whitelistedContracts = app.params.whitelistedAppContracts;
@@ -107,10 +112,15 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
             let appFee = await getGeneratedGasFee(whitelistedContracts[j], taskobj.fromBlockNum, taskobj.toBlockNum);
             totalGasFee += appFee; 
         }
-        generatedAppFee.push(totalGasFee)
+        generatedAppFee.push(totalGasFee);
+        totalGeneratedFee += totalGasFee;
 
     }
-
+    
+    if (totalGeneratedFee === BigInt(0)) {
+        console.log("Generated gas fee is zero. Process complete.")
+        console.log(`=======================================`)
+    }
     const abiCoder = new ethers.AbiCoder();
 
 
@@ -119,6 +129,8 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
         appIds: taskobj.appIds,
         additionalRewards: generatedAppFee,
     };
+
+    console.log("Task response:", taskResponse)
     
     const encoded = abiCoder.encode(
         ["tuple(uint32,uint256[],uint256[])"],
@@ -128,15 +140,13 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
             taskResponse.additionalRewards
         ]]
     );
-    // const taskResponse = `Hello, ${taskName}`;
+    console.log(`Step 3: Sign and respond to the task ${taskIndex}`);
     const messageHash = ethers.keccak256(encoded);
     const messageBytes = ethers.getBytes(messageHash);
     const signature = await wallet.signMessage(messageBytes);
 
-    console.log(`Signing and responding to task ${taskIndex}`);
-
-    console.log(taskResponse, signature);
-
+   
+    console.log(`Step 4: Aggregate signatures.`)
     const operators = [await wallet.getAddress()];
     const signatures = [signature];
     const signedTask = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -144,14 +154,16 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
         [operators, signatures, taskobj.taskCreatedBlock]
     );
 
+    console.log(`Step 5: Submit the response and signed task to the Service Manager.`)
     const tx = await feeShareServiceManager.respondToTask(
         taskobj,
         taskResponse,
         signedTask
     );
-    
+   
     await tx.wait();
-    console.log(`Responded to task.`);
+    console.log(`Responded to task with TX: ${tx.hash}`);
+    console.log(`=======================================`)
 };
 
 const registerOperator = async () => {
@@ -211,7 +223,8 @@ const registerOperator = async () => {
 
 const monitorNewTasks = async () => {
     feeShareServiceManager.on("NewTaskCreated", async (taskIndex: number, task: any) => {
-        console.log(`New task detected: `, task);
+        console.log(`=======================================`)
+        console.log(`New task detected on ${new Date().toLocaleString()}: `,);
         let taskObj: Task = {
             rewardContractAddress: task[0],
             appIds: Array.from(task[1]).map((n:any) => parseInt(n)),
@@ -219,19 +232,19 @@ const monitorNewTasks = async () => {
             toBlockNum: parseInt(task[3]),
             taskCreatedBlock: parseInt(task[4])
         }
-        console.log(`Task OBJ: `, taskObj);
+        console.log(taskObj);
         await signAndRespondToTask(taskIndex, taskObj);
     });
-
-    console.log("Monitoring for new tasks...");
+    console.log(`Operator - Wallet Address: ${wallet.address}.`);
+    console.log("Operator - Monitoring for new tasks...");
 };
 
 const main = async () => {
+    // Already Register
     // await registerOperator();
     monitorNewTasks().catch((error) => {
         console.error("Error monitoring tasks:", error);
     });
-    // console.log(feeShareServiceManagerAddress)
 };
 
 main().catch((error) => {

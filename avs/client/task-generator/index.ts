@@ -6,7 +6,7 @@ dotenv.config();
 
 // Setup env variables
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
+const wallet = new ethers.Wallet(process.env.CONSUMER_PRIVATE_KEY!, provider);
 /// TODO: Hack
 let chainId = process.env.CHAIN_ID;
 let APP_API_URL = process.env.APP_API_URL;
@@ -18,7 +18,7 @@ const feeShareServiceManagerABI = JSON.parse(fs.readFileSync(path.resolve(__dirn
 const feeshareServiceManager = new ethers.Contract(feeShareServiceManagerAddress, feeShareServiceManagerABI, wallet);
 
 // Setup time interval - Block time is 2 seconds
-const INTERVAL = 10000;
+const INTERVAL = parseInt(process.env.NEWTASK_INTERVAL || "10000");
 const PREVIOUS_BLOCK_NUM = INTERVAL / 2000;
 
 export interface Task {
@@ -30,32 +30,35 @@ export interface Task {
 }
 
 async function getApps() {
-   let req = await fetch(`${APP_API_URL}/applications`, {
-     method: "GET",
-     headers: {"Content-Type": "application/context"},
+  let req = await fetch(`${APP_API_URL}/applications`, {
+    method: "GET",
+    headers: { "Content-Type": "application/context" },
 
-   })
+  })
 
-   let res = await req.json()
+  let res = await req.json()
 
-   let rewardContractAndApps: {[key: string]: number[]} = {};
-   for(let i = 0; i < res.apps.length; i++) {
-      let app = res.apps[i];
+  let rewardContractAndApps: { [key: string]: number[] } = {};
+  for (let i = 0; i < res.apps.length; i++) {
+    let app = res.apps[i];
 
-      if (!rewardContractAndApps[app.reward_address]) {
-        rewardContractAndApps[app.reward_address] = [app.onchain_app_id]
-      } else {
-        rewardContractAndApps[app.reward_address] = [...rewardContractAndApps[app.reward_address], app.onchain_app_id]
-      }
-   }
+    if (!rewardContractAndApps[app.reward_address]) {
+      rewardContractAndApps[app.reward_address] = [app.onchain_app_id]
+    } else {
+      rewardContractAndApps[app.reward_address] = [...rewardContractAndApps[app.reward_address], app.onchain_app_id]
+    }
+  }
 
-   return rewardContractAndApps;
+  return rewardContractAndApps;
 
 }
 async function createNewTask() {
   try {
+    console.log(`=======================================`)
+    console.log("New task by AVS consumer address:", wallet.address);
+    console.log("Step 1: Retrieve all whitelisted application information")
     let currentBlock = await provider.getBlockNumber()
-    let apps: {[key: string]: number[]} = await getApps();
+    let apps: { [key: string]: number[] } = await getApps();
     let tasks: Task[] = Object.keys(apps).map((key) => {
       return {
         rewardContractAddress: key,
@@ -64,23 +67,22 @@ async function createNewTask() {
         toBlockNum: currentBlock
       }
     })
-  
+    console.log("Step 2: Construct tasks")
     let task = tasks[0];
-    // console.log(task)
-    
-    // return;
     // Send a transaction to the createNewTask function
+    console.log("Step 3: Trigger new tasks on the Service Manager contract")
     const tx = await feeshareServiceManager.createNewTask(
       task.rewardContractAddress,
       task.appIds,
       task.fromBlockNum,
       task.toBlockNum
     );
-    
+
     // Wait for the transaction to be mined
     const receipt = await tx.wait();
-    
+
     console.log(`Transaction successful with hash: ${receipt.hash}`);
+    console.log(`=======================================`)
   } catch (error) {
     console.error('Error sending transaction:', error);
   }
@@ -88,10 +90,9 @@ async function createNewTask() {
 
 // Function to create a new task with a random name every 15 seconds
 function startCreatingTasks() {
-  createNewTask();
-  // setInterval(() => {
-  //   createNewTask();
-  // }, INTERVAL);
+  setInterval(() => {
+    createNewTask();
+  }, INTERVAL);
 }
 
 // Start the process

@@ -79,13 +79,13 @@ export default function DaoListPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <h4>DAO Address:</h4>
+                                    <h4>DAO Contract:</h4>
                                     <div className="text-sm text-gray-400">
                                         <AddressDisplay address={dao.dao_address} />
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <h4>Treasury Address:</h4>
+                                    <h4>Treasury Contract:</h4>
                                     <div className="text-sm text-gray-400">
                                         <AddressDisplay address={dao.treasury_address} />
                                     </div>
