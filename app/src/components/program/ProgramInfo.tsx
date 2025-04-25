@@ -1,25 +1,32 @@
 "use client"
 
+import Link from "next/link"
 import AddressDisplay from "../common/AddressDisplay"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { ApplyToProgram } from "./ApplyToProgram"
+import { Statistic } from "./Statistic"
 
-export const ProgramInfo = ({ dao, program }: { dao: any, program: any }) => {
+export const ProgramInfo = ({ onChainAppIds, dao, program }: { onChainAppIds: number[], dao: any, program: any }) => {
     return (<Card className="md:col-span-1">
         <CardHeader>
-            <CardTitle>Program Information</CardTitle>
+            <CardTitle className="uppercase">Program Information</CardTitle>
             {/* <CardDescription>{dao.params.daoDescription}</CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
             <Separator />
+            <Statistic rewardAddress={program.reward_address} onChainAppIds={onChainAppIds}/>
+            <Separator />
 
             <div className="space-y-1">
                 <h4>Organization Name:</h4>
-                <div className="text-sm text-gray-400">
-                    {
-                        dao.params.daoName
-                    }
+                <div className="text-sm text-green-400">
+
+                    <Link href={`/daos/${dao._id}`}>
+                        {
+                            dao.params.daoName
+                        }
+                    </Link>
                 </div>
             </div>
             <div className="space-y-1">
@@ -125,7 +132,7 @@ export const ProgramInfo = ({ dao, program }: { dao: any, program: any }) => {
                     </div>
                 </div>
 
-                
+
             </div>
             <Separator />
             <ApplyToProgram dao_address={dao.dao_address} reward_address={program.reward_address} program_address={program.program_address} dao_id={dao._id} />

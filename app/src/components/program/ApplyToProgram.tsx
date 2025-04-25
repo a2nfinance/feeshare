@@ -137,6 +137,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                         applicationName: data.applicationName,
                         website: data.website,
                         xAccount: data.xAccount,
+                        reward_address: reward_address,
                         beneficiaryApp: getAddress(data.beneficiaryApp),
                         whitelistedAppContracts: data.whitelistedAppContracts
                     }
@@ -147,7 +148,6 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                         body: JSON.stringify({
                             creator: address,
                             onchain_id: parseInt(proposalId),
-                            reward_address: reward_address,
                             dao_id: dao_id,
                             duration_in_days: data.durationInDays,
                             proposal_type: data.type,

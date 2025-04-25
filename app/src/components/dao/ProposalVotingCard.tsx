@@ -157,6 +157,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                             onchain_app_id: parseInt(appId),
                             application_name: params.applicationName,
                             program_address: params.targetContract,
+                            reward_address: params.reward_address,
                             dao_address: contractAddress,
                             dao_id: daoId,
                             proposal_id: proposalDBId,

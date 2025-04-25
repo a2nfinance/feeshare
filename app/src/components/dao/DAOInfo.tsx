@@ -1,19 +1,48 @@
 "use client"
 import DAOJSON from "@/lib/abi/DAO.json"
-import { useReadContract } from "wagmi"
+import { useAccount, useBalance, useReadContract } from "wagmi"
 import AddressDisplay from "../common/AddressDisplay"
 import { Button } from "../ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { Separator } from "../ui/separator"
 import { FundTreasury } from "./FundTreasury"
+import { useEffect, useState } from "react"
+import { Badge } from "../ui/badge"
+import { formatEther } from "viem"
 const abi = DAOJSON.abi;
 export const DAOInfo = ({ dao }: { dao: any }) => {
-
+    const { chainId } = useAccount()
+    const [statistic, setStatistic] = useState<{ proposalNum: number, programNum: number, appNum: number, fundingReqs: number }>({ proposalNum: 0, programNum: 0, appNum: 0, fundingReqs: 0 });
+    const [loading, setLoading] = useState<boolean>(false)
     const { data: memberCount } = useReadContract({
         address: dao.dao_address,
         abi,
         functionName: "getMemberCount",
     });
+
+    const { data: balance } = useBalance({
+        address: dao.treasury_address,
+        chainId: chainId || 1924
+    })
+
+    function fetchStatistic() {
+        setLoading(true);
+        fetch('/api/daostatistic', {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ _id: dao._id })
+        })
+            .then(res => res.json())
+            .then(data => {
+                setStatistic(data.statistic);
+                console.log(statistic);
+                setLoading(false);
+            });
+    }
+
+    useEffect(() => {
+        fetchStatistic()
+    }, [])
     return (
         <Card className="md:col-span-1">
             <CardHeader>
@@ -102,6 +131,43 @@ export const DAOInfo = ({ dao }: { dao: any }) => {
                     </div>
 
                 </div>
+
+                <Separator />
+                <div className="grid grid-cols-2 space-y-2">
+                    <div className="space-y-1">
+                        <h4>Proposals:</h4>
+                        <div className="text-sm text-gray-400">
+                            {statistic.proposalNum}
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <h4>Programs:</h4>
+                        <div className="text-sm text-gray-400">
+                            {statistic.programNum}
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <h4>Approved Apps:</h4>
+                        <div className="text-sm text-gray-400">
+                            {statistic.proposalNum}
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <h4>Funding Requests:</h4>
+                        <div className="text-sm text-gray-400">
+                            {statistic.fundingReqs}
+                        </div>
+                    </div>
+                </div>
+                <Separator />
+
+                <Badge className="bg-green-600 w-full text-center">
+                    Treasury Balance: <br/>
+                    {
+                        // @ts-ignore
+                        formatEther(balance?.value || "0")
+                    } ETH
+                </Badge>
 
                 <Separator />
 

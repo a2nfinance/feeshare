@@ -46,7 +46,7 @@ const RewardABI = RewardJSON.abi;
 const proposalSchema = z.object({
     name: z.string().min(1),
     durationInDays: z.coerce.number().min(1),
-    type: z.enum(['incentive', 'sendfund', "updateavscontract"]),
+    type: z.enum(['incentive', 'sendfund', "updateavscontract", "allowclaim"]),
 
     // Incentive fields
     title: z.string().optional(),
@@ -66,7 +66,8 @@ const proposalSchema = z.object({
     // Send fund fields
     tokenAddress: z.string().optional(),
     receiverAddress: z.string().optional(),
-    amount: z.coerce.number().optional()
+    amount: z.coerce.number().optional(),
+    allowClaim: z.string().optional()
 });
 
 type ProposalFormValues = z.infer<typeof proposalSchema>;
@@ -87,7 +88,8 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
             fixedRewardPercentage: 5,
             rewardRules: [{ amount: 1, percentage: 10 }],
             amount: 0.001,
-            title: ""
+            title: "",
+            allowClaim: "0"
         }
     });
 
@@ -107,7 +109,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                 const startTimestamp = Math.floor(new Date(data.startDate!).getTime() / 1000);
                 const endTimestamp = Math.floor(new Date(data.endDate!).getTime() / 1000);
                 const rules = data.rewardRules!.map(
-                    (rw: { amount: number, percentage: number }) => ([parseEther(`${rw.amount}`), BigInt(rw.percentage * 100)])
+                    (rw: { amount: number, percentage: number }) => ([parseEther(`${rw.amount}`), BigInt(rw.percentage)])
                 );
 
                 callData = encodeFunctionData({
@@ -145,6 +147,16 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                     functionName: 'updateAvsSubmitContractAddress',
                     args: [
                         data.avsSubmitContract
+                    ]
+                })
+            }
+
+            if (data.type === "allowclaim") {
+                callData = encodeFunctionData({
+                    abi: RewardABI,
+                    functionName: 'setAllowClaim',
+                    args: [
+                        data.allowClaim === "1" ? true : false
                     ]
                 })
             }
@@ -300,6 +312,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                                                 <option value="incentive">Incentive Program</option>
                                                 <option value="sendfund">Send Fund</option>
                                                 <option value="updateavscontract">Update AVS for RewardContract</option>
+                                                <option value="allowclaim">Allow Developer to Claim Reward</option>
                                             </select>
                                         </FormControl>
                                     </FormItem>
@@ -429,13 +442,13 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                                             <div key={fieldItem.id} className="grid grid-cols-3 gap-4 items-end">
                                                 <FormField name={`rewardRules.${index}.amount`} control={form.control} render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Amount (ETH)</FormLabel>
+                                                        <FormLabel>Generated Gas Fee (ETH)</FormLabel>
                                                         <FormControl><Input type="number" {...field} /></FormControl>
                                                     </FormItem>
                                                 )} />
                                                 <FormField name={`rewardRules.${index}.percentage`} control={form.control} render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Reward (%)</FormLabel>
+                                                        <FormLabel>Reward Percentage (%)</FormLabel>
                                                         <FormControl><Input type="number" {...field} /></FormControl>
                                                     </FormItem>
                                                 )} />
@@ -527,6 +540,49 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                                             label={"FeeShareAVS contract"}
                                         />
                                     )} />
+                                </div>
+
+
+
+
+                            </>
+                        )}
+
+
+                        {type === 'allowclaim' && (
+                            <>
+                                <Separator title='' />
+
+                                <div className='grid grid-cols-2 gap-4 items-center'>
+                                    <FormField name="targetContract" control={form.control} render={({ field, fieldState }) => (
+
+                                        <AddressInput
+                                            //@ts-ignore
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            error={fieldState.error?.message}
+                                            label="Reward Contract"
+                                        />
+                                    )} />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="allowClaim"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Template</FormLabel>
+                                                <FormControl>
+                                                    <select
+                                                        {...field}
+                                                        className="w-full border rounded px-3 py-2 bg-background"
+                                                    >
+                                                        <option value="1">Yes</option>
+                                                        <option value="0">No</option>
+                                                    </select>
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
 
 

@@ -71,7 +71,7 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params
     return reward;
   }
   return <>
-    <Badge className="bg-green-500 w-full">Estimated Reward: {formatEther(calculateReward(reward))} ETH</Badge>
+    <Badge className="bg-green-600 w-full text-center">Estimated Reward: <br/> {reward === BigInt(0) ? 0 : parseFloat(formatEther(calculateReward(reward))).toFixed(10)} ETH</Badge>
     <Button size={"sm"} 
     disabled={formatEther(reward ?? BigInt(0)) === "0"} 
     className="w-full mt-2" onClick={() => claim()}>
