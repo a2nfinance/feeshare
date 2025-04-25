@@ -73,7 +73,7 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params
   return <>
     <Badge className="bg-green-600 w-full text-center">Estimated Reward: <br/> {reward === BigInt(0) ? 0 : parseFloat(formatEther(calculateReward(reward))).toFixed(10)} ETH</Badge>
     <Button size={"sm"} 
-    disabled={formatEther(reward ?? BigInt(0)) === "0"} 
+    disabled={formatEther(reward ?? BigInt(0)) === "0" || claimRewardProcessing} 
     className="w-full mt-2" onClick={() => claim()}>
       {claimRewardProcessing && <Loader2 className='animate-spin' />}
       Claim Reward
