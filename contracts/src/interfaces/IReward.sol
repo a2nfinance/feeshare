@@ -40,6 +40,13 @@ interface IReward {
      */
     function updateAvsSubmitContractAddress(address _newAvsSubmitContractAddress) external;
 
+    /**
+    * @dev Get reward and generated fee for apps
+    * @param _appIds whitelisted application Ids
+    * @return Returns generated fee and rewards 
+    */
+    function getAppRewardReport(uint256[] memory _appIds) external view returns (uint256, uint256);
+
     // Events
     event Claimed(uint256 appId, address claimant, uint256 amount);
     event AllowClaimUpdated(bool allowClaim);

@@ -24,7 +24,6 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
     // Reward App: appId -> rewardAmount
     mapping(uint256 => uint256) public rewardApp;
 
-
     /**
      * @dev Initializes the Reward contract.
      * @param _owner The owner address.
@@ -33,12 +32,18 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
      */
     constructor(
         address _owner,
-        address _programContractAddress, 
+        address _programContractAddress,
         address _avsSubmitContractAddress
     ) Ownable(_owner) {
         require(_owner != address(0), "Owner address cannot be zero.");
-        require(_programContractAddress != address(0), "Program contract address cannot be zero.");
-        require(_avsSubmitContractAddress != address(0), "AVS Submit contract address cannot be zero.");
+        require(
+            _programContractAddress != address(0),
+            "Program contract address cannot be zero."
+        );
+        require(
+            _avsSubmitContractAddress != address(0),
+            "AVS Submit contract address cannot be zero."
+        );
 
         programContractAddress = _programContractAddress;
         avsSubmitContractAddress = _avsSubmitContractAddress;
@@ -53,10 +58,16 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
         require(rewardApp[_appId] > 0, "No rewards available for this app.");
 
         Program program = Program(programContractAddress);
-        require(program.isAppWhitelisted(_appId), "App is not whitelisted for this app.");
+        require(
+            program.isAppWhitelisted(_appId),
+            "App is not whitelisted for this app."
+        );
 
         address beneficiary = program.beneficiaryApp(_appId);
-        require(beneficiary != address(0), "Beneficiary address not set for this app.");
+        require(
+            beneficiary != address(0),
+            "Beneficiary address not set for this app."
+        );
 
         uint256 generatedFee = rewardApp[_appId];
         uint256 rewardType = program.rewardType();
@@ -65,16 +76,20 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
         Structs.Rule[] memory rules = program.getRewardRules();
 
         if (rewardType == 0) {
-            rewardAmount = generatedFee * program.fixedRewardPercentage() / 100;
+            rewardAmount =
+                (generatedFee * program.fixedRewardPercentage()) /
+                100;
         } else {
-            
-            for(uint256 i = 0; i < rules.length; i++) {
-                if (generatedFee >= rules[i].amount) {
-                    rewardAmount = generatedFee * rules[i].rewardPercentage / 100;
+            for (uint256 k = rules.length; k > 0; k--) {
+                if (generatedFee >= rules[k - 1].amount) {
+                    rewardAmount =
+                        (generatedFee * rules[k - 1].rewardPercentage) /
+                        100;
+                    break;
                 }
             }
         }
-        
+
         // Reset reward for this app
         rewardApp[_appId] = 0;
 
@@ -97,9 +112,18 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
     /**
      * @inheritdoc IReward
      */
-    function updateReward(uint256[] memory _appIds, uint256[] memory _additionalRewards) external {
-        require(msg.sender == avsSubmitContractAddress, "Only the AVS Submit Contract can call this function.");
-        require(_appIds.length == _additionalRewards.length, "Arrays must have the same length.");
+    function updateReward(
+        uint256[] memory _appIds,
+        uint256[] memory _additionalRewards
+    ) external {
+        require(
+            msg.sender == avsSubmitContractAddress,
+            "Only the AVS Submit Contract can call this function."
+        );
+        require(
+            _appIds.length == _additionalRewards.length,
+            "Arrays must have the same length."
+        );
 
         for (uint256 i = 0; i < _appIds.length; i++) {
             rewardApp[_appIds[i]] += _additionalRewards[i];
@@ -110,21 +134,65 @@ contract Reward is Ownable, ReentrancyGuard, IReward {
     /**
      * @inheritdoc IReward
      */
-    function updateProgramContractAddress(address _newProgramContractAddress) external onlyOwner {
-        require(_newProgramContractAddress != address(0), "Program contract address cannot be zero.");
+    function updateProgramContractAddress(
+        address _newProgramContractAddress
+    ) external onlyOwner {
+        require(
+            _newProgramContractAddress != address(0),
+            "Program contract address cannot be zero."
+        );
         programContractAddress = _newProgramContractAddress;
     }
 
     /**
      * @inheritdoc IReward
      */
-    function updateAvsSubmitContractAddress(address _newAvsSubmitContractAddress) external onlyOwner {
-        require(_newAvsSubmitContractAddress != address(0), "AVS Submit contract address cannot be zero.");
+    function updateAvsSubmitContractAddress(
+        address _newAvsSubmitContractAddress
+    ) external onlyOwner {
+        require(
+            _newAvsSubmitContractAddress != address(0),
+            "AVS Submit contract address cannot be zero."
+        );
         avsSubmitContractAddress = _newAvsSubmitContractAddress;
     }
 
-    receive() external payable {
+    /**
+     * @inheritdoc IReward
+     */
+    function getAppRewardReport(
+        uint256[] memory _appIds
+    ) external view returns (uint256, uint256) {
+        Program program = Program(programContractAddress);
+        Structs.Rule[] memory rules = program.getRewardRules();
+        uint256 fixedRewardPercentage = program.fixedRewardPercentage();
+        uint256 ruleLength = rules.length;
+        uint256 rewardType = program.rewardType();
+        uint256 totalGeneratedFee = 0;
+        uint256 totalRewardAmount = 0;
+
+        uint256 generatedFee = 0;
+        uint256 rewardAmount = 0;
+        for (uint256 i = 0; i < _appIds.length; i++) {
+            generatedFee = rewardApp[_appIds[i]];
+            if (rewardType == 0) {
+                rewardAmount = (generatedFee * fixedRewardPercentage) / 100;
+            } else {
+                for (uint256 k = ruleLength; k > 0; k--) {
+                    if (generatedFee >= rules[k - 1].amount) {
+                        rewardAmount =
+                            (generatedFee * rules[k - 1].rewardPercentage) /
+                            100;
+                        break;
+                    }
+                }
+            }
+            totalGeneratedFee += generatedFee;
+            totalRewardAmount += rewardAmount;
+        }
+        return (totalGeneratedFee, totalRewardAmount);
     }
-    fallback() external payable {
-    }
+
+    receive() external payable {}
+    fallback() external payable {}
 }

@@ -105,9 +105,13 @@ contract ProgramFactoryTest is Test {
         appIds[0] = 0;
         generatedFees[0] = 0.0005 ether;
         rewardContract.updateReward(appIds, generatedFees);
-
         uint256 aliceBalanceBefore = alice.balance;
         vm.prank(alice);
+        (uint256 generatedFee, uint256 reward) = rewardContract.getAppRewardReport(appIds);
+
+        assertEq(generatedFee, 0.0005 ether);
+        assertEq(reward, 0.00005 ether);
+
         rewardContract.claim(0);
         uint256 aliceBalanceAfter = alice.balance;
         assertEq(aliceBalanceBefore, aliceBalanceAfter - 0.00005 ether);
