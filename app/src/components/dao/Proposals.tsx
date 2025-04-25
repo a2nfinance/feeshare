@@ -2,12 +2,22 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { NewProposal } from "./NewProposal";
 import { ProposalDetail } from "./ProposalDetail";
-
+import { EyeIcon } from "lucide-react";
+export const proposalType = (proposalType: string) => {
+    const map: {[key: string]: any} = {
+        "sendfund": <Badge className="bg-green-600">Send Fund</Badge>,
+        "allowclaim": <Badge className="bg-blue-600">Allow Claim</Badge>,
+        "applyprogram": <Badge className="bg-yellow-600">Apply Program</Badge>,
+        "incentive": <Badge className="bg-indigo-600">New Program</Badge>,
+        "updateavscontract": <Badge className="bg-violet-500">Update AVS</Badge>
+    }
+    return map[proposalType];
+}
 export const Proposals = (
     { dao_address, treasury_address, dao_id }: { dao_address: string, treasury_address: string, dao_id: string }
 ) => {
@@ -51,7 +61,8 @@ export const Proposals = (
                             <TableHead>Start Time</TableHead>
                             <TableHead>Duration (days)</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead>Template</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Details</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -65,13 +76,17 @@ export const Proposals = (
                                         {proposal.status}
                                     </Badge>
                                 </TableCell>
-                                <TableCell>{proposal.proposal_type}</TableCell>
+                                <TableCell>{proposalType(proposal.proposal_type)}</TableCell>
                                 <TableCell>
-                                    <Button key={`button-${proposal._id}`} onClick={() => {
+                                    <Button variant={"outline"} key={`button-${proposal._id}`} onClick={() => {
 
                                         setSelectedProposal(proposal);
                                         setOpenDialog(true);
-                                    }}>details</Button>
+                                    }}>
+                                        
+                                        <EyeIcon />
+                                        
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

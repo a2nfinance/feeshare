@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 
 import { DAOItem } from '@/components/dao/DAOItem';
 import { Separator } from '@/components/ui/separator';
+import { useAccount } from 'wagmi';
+
 
 type DAO = {
     _id: string;
@@ -14,12 +16,21 @@ type DAO = {
     created_at: any;
 };
 
-export default function DaoListPage() {
+export default function MyDAOsPage() {
+    const {address} = useAccount()
     const [daos, setDaos] = useState<DAO[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/daos')
+        fetch(
+            '/api/mydaos',
+            {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({creator: address ?? "0x0"})
+            }
+        
+        )
             .then(res => res.json())
             .then(data => {
                 setDaos(data.daos);
@@ -33,7 +44,7 @@ export default function DaoListPage() {
     return (
         <div>
             <div className="px-6">
-                <h4 className="uppercase hover:animate-pulse">ORGANIZATIONS</h4>
+                <h4 className="uppercase hover:animate-pulse">MY ORGANIZATIONS</h4>
                 <p className="text-gray-400 mb-4">All decisions are made on-chain with full transparency. A DAO can be used to manage unlimited incentive programs and whitelisted applications.</p>
                 <Separator />
             </div>

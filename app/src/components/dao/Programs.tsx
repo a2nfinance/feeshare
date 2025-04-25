@@ -2,13 +2,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
+import { EyeIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
 export const Programs = (
     {dao_id }: { dao_id: string }
 ) => {
+    const router = useRouter();
     const [programs, setPrograms] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -46,6 +49,7 @@ export const Programs = (
                             <TableHead>Start Date</TableHead>
                             <TableHead>End Date</TableHead>
                             <TableHead>Reward Type</TableHead>
+                            <TableHead>Details</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -60,7 +64,7 @@ export const Programs = (
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <Link key={`button-${program._id}`} href={`/programs/${program._id}`}>details</Link>
+                                    <Button variant={"outline"} key={`button-${program._id}`} onClick={() => router.push(`/programs/${program._id}`)}><EyeIcon /></Button>
                                 </TableCell>
                             </TableRow>
                         ))}

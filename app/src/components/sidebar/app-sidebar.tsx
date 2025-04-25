@@ -29,7 +29,7 @@ import {
 const data = {
   user: {
     name: "support",
-    email: "john@a2n.finance",
+    email: "john | levi @ a2n.finance",
     avatar: "/logo/favicon.ico",
   },
   navMain: [

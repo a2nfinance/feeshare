@@ -265,7 +265,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
             <DialogTrigger asChild>
                 <Button>New Proposal</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-3xl max-h-[100vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create Proposal</DialogTitle>
                 </DialogHeader>
@@ -309,10 +309,10 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                                                 {...field}
                                                 className="w-full border rounded px-3 py-2 bg-background"
                                             >
-                                                <option value="incentive">Incentive Program</option>
-                                                <option value="sendfund">Send Fund</option>
-                                                <option value="updateavscontract">Update AVS for RewardContract</option>
-                                                <option value="allowclaim">Allow Developer to Claim Reward</option>
+                                                <option value="incentive">Create New Incentive Program</option>
+                                                <option value="sendfund">Send Funds</option>
+                                                <option value="updateavscontract">Update AVS for Reward Contract</option>
+                                                <option value="allowclaim">Allow Developers to Claim Rewards</option>
                                             </select>
                                         </FormControl>
                                     </FormItem>

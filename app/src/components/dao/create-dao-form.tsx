@@ -55,7 +55,7 @@ export default function CreateDAOForm() {
             daoDiscordAccount: "",
             daoQuorum: 50,
             daoVotingThreshold: 50,
-            daoOnlyMembersCanPropose: true,
+            daoOnlyMembersCanPropose: false,
             daoAllowEarlierExecution: true,
             initialWhitelistedTokens: [''],
             initialWhitelistedFunders: [''],
