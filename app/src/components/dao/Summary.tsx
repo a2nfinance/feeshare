@@ -8,7 +8,7 @@ export const Summary = ({ summary }: { summary: any }) => {
         <CardHeader>
             <CardTitle className="text-2xl">Organization Information</CardTitle>
             <CardDescription>
-                Please double check organization information before your summit.
+            Please double-check the organization information before creating a new DAO.
             </CardDescription>
         </CardHeader>
         <CardContent className="pt-2 space-y-2 text-sm">

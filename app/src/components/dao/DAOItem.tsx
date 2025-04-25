@@ -15,7 +15,7 @@ export const DAOItem = ({ dao }: any) => {
                 <CardTitle>{dao.params.daoName}</CardTitle>
                 <CardDescription></CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2 text-sm">
 
                 <Separator />
                 <div className="space-y-1">

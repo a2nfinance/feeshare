@@ -35,7 +35,7 @@ export const Statistic = ({ rewardAddress, onChainAppIds }: { rewardAddress: "0x
                     parseFloat(formatEther(statistic?.[1] || BigInt(0))).toFixed(10)
                 } ETH</Badge>
             </div>
-            <Badge className="bg-green-600 w-full text-center hover:animate-pulse">Available Fund: <br />
+            <Badge className="bg-green-600 w-full text-center hover:animate-pulse">Available Funds: <br />
 
                 {
                     // @ts-ignore

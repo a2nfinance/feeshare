@@ -47,9 +47,9 @@ export const WhitelistedApplication = ({ program }: { program: any }) => {
                                     <CardTitle>{app.application_name}</CardTitle>
                                     <CardDescription></CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-2">
+                                <CardContent className="space-y-2 text-sm">
                                     <Separator />
-                                    <div className="grid grid-cols-1 mb-1.5">
+                                    <div className="grid grid-cols-1 mb-1.5 space-y-2">
 
 
                                         <div className="space-y-1">
