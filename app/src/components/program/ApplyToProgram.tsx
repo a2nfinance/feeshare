@@ -319,7 +319,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" disabled={createProposalProcessing} className="w-full">
                             {createProposalProcessing && <Loader2 className='animate-spin' />}
                             Submit
                         </Button>

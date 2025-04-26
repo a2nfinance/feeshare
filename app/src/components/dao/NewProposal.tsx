@@ -591,7 +591,7 @@ export function NewProposal({ dao_address, treasury_address, fetchProposals, dao
                             </>
                         )}
 
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" disabled={createProposalProcessing} className="w-full">
                             {createProposalProcessing && <Loader2 className='animate-spin' />}
                             Submit
                         </Button>

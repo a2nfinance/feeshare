@@ -136,7 +136,7 @@ export function FundTreasury({ dao_address, treasury_address }: { dao_address: s
                         )} />
 
 
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" disabled={fundProcessing} className="w-full">
                             {fundProcessing && <Loader2 className='animate-spin' />}
                             Submit
                         </Button>
