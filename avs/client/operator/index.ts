@@ -13,7 +13,7 @@ if (!Object.keys(process.env).length) {
 // Setup env variables
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY!, provider);
-const apiURL = `https://swell-testnet-explorer.alt.technology/api/v2/addresses`
+const explorerApiURL = `https://swell-testnet-explorer.alt.technology/api`
 
 /// TODO: Hack
 let chainId = process.env.CHAIN_ID;
@@ -43,6 +43,10 @@ const feeShareServiceManager = new ethers.Contract(feeShareServiceManagerAddress
 const ecdsaRegistryContract = new ethers.Contract(ecdsaStakeRegistryAddress, ecdsaRegistryABI, wallet);
 const avsDirectory = new ethers.Contract(avsDirectoryAddress, avsDirectoryABI, wallet);
 
+const buildExplorerReq = (fromBlockNum: number, toBlockNum: number, contractAddress: string) => {
+    return `${explorerApiURL}?module=account&action=txlist&address=${contractAddress}&startblock=${fromBlockNum}&endblock=${toBlockNum}&sort=asc`
+}
+
 const getAppsByIdsAndRewardAddress = async (ids: number[], reward_address: string) => {
     let req = await fetch(`${APP_API_URL}/filterapps`, {
         method: "POST",
@@ -58,17 +62,24 @@ const getAppsByIdsAndRewardAddress = async (ids: number[], reward_address: strin
       return res.apps;
 }
 
-const getAddressTransactions = async (address: string) => {
-    let req = await fetch(`${apiURL}/${address}/transactions`);
-    let res = await req.json();
+const getAddressTransactions = async (fromBlockNum: number, toBlockNum: number, address: string) => {
+    const url = buildExplorerReq(fromBlockNum, toBlockNum, address);
+    const req = await fetch(url, {
+        method: "GET",
+        headers: {"Content-Type": "application/json"}
+    });
+    const res = await req.json();
+    const result = res.result;
     let txs = new Map<number, any>()
-    for(let i=0; i < res.items.length; i++) {
-        let item = res.items[i];
-        txs.set(res.items[i].block_number, {
-            gas_price: item.gas_price,
-            gas_used: item.gas_used,
-            actual_fee: item.fee.value
-        })
+    if (!result || result.length === 0) {
+        return txs;
+    } else {
+        for(let i=0; i < result.length; i++) {
+            const item = result[i];
+            txs.set(parseInt(item.blockNumber), {
+                gasFee: BigInt(item.gasPrice) * BigInt(item.gasUsed)
+            })
+        }
     }
     return txs;
 }
@@ -76,20 +87,17 @@ const getAddressTransactions = async (address: string) => {
 const getGeneratedGasFee = async (contractAddress: string, fromBlockNum: number, toBlockNum: number) => {
     let totalGasFee = ethers.toBigInt(0);
 
-    let transactions = await getAddressTransactions(contractAddress);
+    let transactions = await getAddressTransactions(fromBlockNum, toBlockNum, contractAddress);
 
 
     for (let blockNumber = fromBlockNum; blockNumber <= toBlockNum; blockNumber++) {
 
         let gasInfo = transactions.get(blockNumber);
         if (gasInfo) {
-            totalGasFee += BigInt(gasInfo.actual_fee);
+            totalGasFee += gasInfo.gasFee;
         }
     }
-
-    // console.log(`Actual generated GasFee by contract ${contractAddress} from ${fromBlockNum} to ${toBlockNum} is:`);
     console.log(`Calculating generated gas fee from block ${fromBlockNum} to block ${toBlockNum}.`);
-    // console.log(`${ethers.formatEther(totalGasFee)} ETH`);
     return totalGasFee
 }
 
@@ -97,6 +105,7 @@ const getGeneratedGasFee = async (contractAddress: string, fromBlockNum: number,
 const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
     console.log("Sign and Response Progress:")
     console.log("Step 1: Retrieve whitelisted application information based on app IDs")
+
 
     const apps = await getAppsByIdsAndRewardAddress(taskobj.appIds, taskobj.rewardContractAddress);
 

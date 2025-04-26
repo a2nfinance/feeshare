@@ -86,7 +86,7 @@ library FeeShareDeploymentLib {
                 core.rewardsCoordinator,
                 core.delegationManager,
                 core.allocationManager,
-                4
+                10
             )
         );
 

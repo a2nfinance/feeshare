@@ -25,7 +25,7 @@ mainnet = "${MAINNET_RPC_URL}"
 holesky = "${HOLESKY_RPC_URL}"
 sepolia = "${SEPOLIA_RPC_URL}"
 anvil = "${ANVIL_RPC_URL}"
-swell_testnet = "${SWELLCHAIN_TESTNET_RPC_URL}"
+swell_testnet = "${RPC_URL}"
 
 [etherscan]
 mainnet = { key = "${ETHERSCAN_API_KEY}" }
