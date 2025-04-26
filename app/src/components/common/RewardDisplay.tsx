@@ -10,6 +10,7 @@ import { useReadContract, useWriteContract } from "wagmi"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import CongratulationModal from "./CongratulationModal"
+import { config } from "@/lib/wagmi"
 const RewardABI = RewardJSON.abi;
 export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params }: { rewardContractAddress: `0x${string}`, abi: any, onchainAppId: number, params: any }) => {
   const [showCongrats, setShowCongrats] = useState(false);
