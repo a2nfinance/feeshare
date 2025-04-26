@@ -5,7 +5,7 @@ FeeShare is a platform that combines DAO tooling with a new EigenLayer AVS solut
 
 # Basic Workflow
 
-# Sourcecode Structure
+# Source Code Structure
 
 # Smart Contracts
 

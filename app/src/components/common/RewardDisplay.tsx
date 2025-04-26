@@ -43,7 +43,7 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params
       await waitForTransactionReceipt(config.getClient(chainId), {
         hash: tx,
       });
-      setTxHash("aaaaa");
+      setTxHash(tx);
       setShowCongrats(true)
     } catch (e: any) {
       if (e instanceof BaseError) {

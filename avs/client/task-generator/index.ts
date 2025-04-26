@@ -30,13 +30,13 @@ export interface Task {
 }
 
 async function getApps() {
-  let req = await fetch(`${APP_API_URL}/applications`, {
+  const req = await fetch(`${APP_API_URL}/applications`, {
     method: "GET",
     headers: { "Content-Type": "application/context" },
 
   })
 
-  let res = await req.json()
+  const res = await req.json()
 
   let rewardContractAndApps: { [key: string]: number[] } = {};
   for (let i = 0; i < res.apps.length; i++) {
@@ -57,9 +57,11 @@ async function createNewTask() {
     console.log(`=======================================`)
     console.log("New task by AVS consumer address:", wallet.address);
     console.log("Step 1: Retrieve all whitelisted application information")
-    let currentBlock = await provider.getBlockNumber()
-    let apps: { [key: string]: number[] } = await getApps();
-    let tasks: Task[] = Object.keys(apps).map((key) => {
+    const currentBlock = await provider.getBlockNumber()
+    const apps: { [key: string]: number[] } = await getApps();
+    
+    console.log("Step 2: Construct tasks")
+    const tasks: Task[] = Object.keys(apps).map((key) => {
       return {
         rewardContractAddress: key,
         appIds: apps[key],
@@ -67,28 +69,37 @@ async function createNewTask() {
         toBlockNum: currentBlock
       }
     })
-    console.log("Step 2: Construct tasks")
-    let task = tasks[0];
+
+    if (!tasks || tasks.length === 0) {
+      console.log("No task was constructed. No whitelisted app found!")
+      console.log(`=======================================`)
+      return;
+    }
+   
     // Send a transaction to the createNewTask function
     console.log("Step 3: Trigger new tasks on the Service Manager contract")
-    const tx = await feeshareServiceManager.createNewTask(
-      task.rewardContractAddress,
-      task.appIds,
-      task.fromBlockNum,
-      task.toBlockNum
-    );
+    for (let i = 0; i < tasks.length; i++) {
+      let task = tasks[i];
+      let tx = await feeshareServiceManager.createNewTask(
+        task.rewardContractAddress,
+        task.appIds,
+        task.fromBlockNum,
+        task.toBlockNum
+      );
 
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait();
+      // Wait for the transaction to be mined
+      let receipt = await tx.wait();
 
-    console.log(`Transaction successful with hash: ${receipt.hash}`);
+      console.log(`Transaction successful with hash: ${receipt.hash}`);
+    }
+
     console.log(`=======================================`)
   } catch (error) {
     console.error('Error sending transaction:', error);
   }
 }
 
-// Function to create a new task with a random name every 15 seconds
+// Creates new tasks on a regular interval
 function startCreatingTasks() {
   setInterval(() => {
     createNewTask();
