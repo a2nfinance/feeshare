@@ -19,6 +19,7 @@ const ProgramFactoryABI = ProgramFactoryJSON.abi;
 const ProgramABI = ProgramJSON.abi;
 
 type ProposalVotingCardProps = {
+    fetchProposals: () => void,
     proposalDBId: string,
     params: any,
     proposalId: number;
@@ -28,7 +29,7 @@ type ProposalVotingCardProps = {
     creator?: `0x${string}`
 };
 
-export default function ProposalVotingCard({ proposalDBId, params, proposalId, contractAddress, daoId, proposalType, creator }: ProposalVotingCardProps) {
+export default function ProposalVotingCard({ fetchProposals, proposalDBId, params, proposalId, contractAddress, daoId, proposalType, creator }: ProposalVotingCardProps) {
     const [isVoting, setIsVoting] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const { address, chainId } = useAccount()
@@ -56,7 +57,8 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
             await waitForTransactionReceipt(config.getClient(chainId), {
                 hash: tx,
             });
-            await refetch()
+            await refetch();
+            
         } catch (err: any) {
             if (err instanceof BaseError) {
                 toast.error(`Error: ${err.shortMessage}`)
@@ -173,6 +175,7 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
 
 
             await refetch()
+            fetchProposals()
         } catch (err: any) {
             if (err instanceof BaseError) {
                 toast.error(`Error: ${err.shortMessage}`)
@@ -215,17 +218,19 @@ export default function ProposalVotingCard({ proposalDBId, params, proposalId, c
                 {/* Section 3: Buttons */}
                 <div className="flex justify-center gap-6 mt-4">
                     <Button
-                        disabled={isVoting || dt?.[3]?.executed}
+                        disabled={isVoting || dt?.[3]?.executed || isProcessing}
                         onClick={() => handleVote(true)}
                         className="bg-green-600 hover:bg-green-700 text-white"
                     >
+                        {isVoting && <Loader2 className='animate-spin' />}
                         Support
                     </Button>
                     <Button
-                        disabled={isVoting || dt?.[3]?.executed}
+                        disabled={isVoting || dt?.[3]?.executed || isProcessing}
                         onClick={() => handleVote(false)}
                         className="bg-red-600 hover:bg-red-700 text-white"
                     >
+                        {isVoting && <Loader2 className='animate-spin' />}
                         Against
                     </Button>
 

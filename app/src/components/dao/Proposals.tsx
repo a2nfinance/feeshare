@@ -92,7 +92,7 @@ export const Proposals = (
                         ))}
                     </TableBody>
                 </Table>
-                <ProposalDetail open={openDialog} setOpen={setOpenDialog} proposalDetail={selectedProposal} />
+                <ProposalDetail open={openDialog} setOpen={setOpenDialog} proposalDetail={selectedProposal} fetchProposals={fetchProposals} />
             </CardContent>
         </Card >
     )

@@ -8,7 +8,7 @@ import { proposalType } from "./Proposals";
 import ProposalVotingCard from "./ProposalVotingCard";
 
 
-export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolean, setOpen: (open: boolean) => void, proposalDetail: any }) => {
+export const ProposalDetail = ({ open, setOpen, proposalDetail, fetchProposals }: { open: boolean, setOpen: (open: boolean) => void, proposalDetail: any, fetchProposals: () => void }) => {
     if (!proposalDetail) return <div className="p-4 text-gray-500"></div>;
 
 
@@ -54,6 +54,7 @@ export const ProposalDetail = ({ open, setOpen, proposalDetail }: { open: boolea
                 </div>
                 <Separator title="Voting Progress" />
                 <ProposalVotingCard
+                    fetchProposals={fetchProposals}
                     daoId={proposalDetail?.dao_id}
                     proposalDBId={proposalDetail?._id}
                     params={proposalDetail?.params}
