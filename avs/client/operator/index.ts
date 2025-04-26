@@ -50,23 +50,23 @@ const buildExplorerReq = (fromBlockNum: number, toBlockNum: number, contractAddr
 const getAppsByIdsAndRewardAddress = async (ids: number[], reward_address: string) => {
     let req = await fetch(`${APP_API_URL}/filterapps`, {
         method: "POST",
-        headers: {"Content-Type": "application/context"},
+        headers: { "Content-Type": "application/context" },
         body: JSON.stringify({
             reward_address: reward_address,
             onchain_ids: ids
         })
-   
-      })
-   
-      let res = await req.json()
-      return res.apps;
+
+    })
+
+    let res = await req.json()
+    return res.apps;
 }
 
 const getAddressTransactions = async (fromBlockNum: number, toBlockNum: number, address: string) => {
     const url = buildExplorerReq(fromBlockNum, toBlockNum, address);
     const req = await fetch(url, {
         method: "GET",
-        headers: {"Content-Type": "application/json"}
+        headers: { "Content-Type": "application/json" }
     });
     const res = await req.json();
     const result = res.result;
@@ -74,7 +74,7 @@ const getAddressTransactions = async (fromBlockNum: number, toBlockNum: number, 
     if (!result || result.length === 0) {
         return txs;
     } else {
-        for(let i=0; i < result.length; i++) {
+        for (let i = 0; i < result.length; i++) {
             const item = result[i];
             txs.set(parseInt(item.blockNumber), {
                 gasFee: BigInt(item.gasPrice) * BigInt(item.gasUsed)
@@ -113,19 +113,19 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
     let totalGeneratedFee = BigInt(0)
 
     console.log("Step 2: Calculate generated gas fees using on-chain app IDs")
-    for(let i = 0; i < apps.length; i++) {
+    for (let i = 0; i < apps.length; i++) {
         let app = apps[i];
         let whitelistedContracts = app.params.whitelistedAppContracts;
         let totalGasFee = ethers.toBigInt(0)
-        for(let j = 0; j < whitelistedContracts.length; j++) {
+        for (let j = 0; j < whitelistedContracts.length; j++) {
             let appFee = await getGeneratedGasFee(whitelistedContracts[j], taskobj.fromBlockNum, taskobj.toBlockNum);
-            totalGasFee += appFee; 
+            totalGasFee += appFee;
         }
         generatedAppFee.push(totalGasFee);
         totalGeneratedFee += totalGasFee;
 
     }
-    
+
     if (totalGeneratedFee === BigInt(0)) {
         console.log("Generated gas fee is zero. Process complete.")
         console.log(`=======================================`)
@@ -141,7 +141,7 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
     };
 
     console.log("Task response:", taskResponse)
-    
+
     const encoded = abiCoder.encode(
         ["tuple(uint32,uint256[],uint256[])"],
         [[
@@ -155,7 +155,7 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
     const messageBytes = ethers.getBytes(messageHash);
     const signature = await wallet.signMessage(messageBytes);
 
-   
+
     console.log(`Step 4: Aggregate signatures.`)
     const operators = [await wallet.getAddress()];
     const signatures = [signature];
@@ -170,7 +170,7 @@ const signAndRespondToTask = async (taskIndex: number, taskobj: Task) => {
         taskResponse,
         signedTask
     );
-   
+
     await tx.wait();
     console.log(`Responded to task with TX: ${tx.hash}`);
     console.log(`=======================================`)
@@ -187,48 +187,49 @@ const registerOperator = async () => {
         );
         await tx1.wait();
         console.log("Operator registered to Core EigenLayer contracts");
+
+
+        const salt = ethers.hexlify(ethers.randomBytes(32));
+        const expiry = Math.floor(Date.now() / 1000) + 3600; // Example expiry, 1 hour from now
+
+        // Define the output structure
+        let operatorSignatureWithSaltAndExpiry = {
+            signature: "",
+            salt: salt,
+            expiry: expiry
+        };
+
+        // Calculate the digest hash, which is a unique value representing the operator, avs, unique value (salt) and expiration date.
+        const operatorDigestHash = await avsDirectory.calculateOperatorAVSRegistrationDigestHash(
+            wallet.address,
+            await feeShareServiceManager.getAddress(),
+            salt,
+            expiry
+        );
+        console.log(operatorDigestHash);
+
+        // Sign the digest hash with the operator's private key
+        console.log("Signing digest hash with operator's private key");
+        const operatorSigningKey = new ethers.SigningKey(process.env.PRIVATE_KEY!);
+        const operatorSignedDigestHash = operatorSigningKey.sign(operatorDigestHash);
+
+        // Encode the signature in the required format
+        operatorSignatureWithSaltAndExpiry.signature = ethers.Signature.from(operatorSignedDigestHash).serialized;
+
+        console.log("Registering Operator to AVS Registry contract");
+
+
+        // Register Operator to AVS
+        // Per release here: https://github.com/Layr-Labs/eigenlayer-middleware/blob/v0.2.1-mainnet-rewards/src/unaudited/ECDSAStakeRegistry.sol#L49
+        const tx2 = await ecdsaRegistryContract.registerOperatorWithSignature(
+            operatorSignatureWithSaltAndExpiry,
+            wallet.address
+        );
+        await tx2.wait();
+        console.log("Operator registered on AVS successfully");
     } catch (error) {
         console.error("Error in registering as operator:", error);
     }
-
-    const salt = ethers.hexlify(ethers.randomBytes(32));
-    const expiry = Math.floor(Date.now() / 1000) + 3600; // Example expiry, 1 hour from now
-
-    // Define the output structure
-    let operatorSignatureWithSaltAndExpiry = {
-        signature: "",
-        salt: salt,
-        expiry: expiry
-    };
-
-    // Calculate the digest hash, which is a unique value representing the operator, avs, unique value (salt) and expiration date.
-    const operatorDigestHash = await avsDirectory.calculateOperatorAVSRegistrationDigestHash(
-        wallet.address,
-        await feeShareServiceManager.getAddress(),
-        salt,
-        expiry
-    );
-    console.log(operatorDigestHash);
-
-    // Sign the digest hash with the operator's private key
-    console.log("Signing digest hash with operator's private key");
-    const operatorSigningKey = new ethers.SigningKey(process.env.PRIVATE_KEY!);
-    const operatorSignedDigestHash = operatorSigningKey.sign(operatorDigestHash);
-
-    // Encode the signature in the required format
-    operatorSignatureWithSaltAndExpiry.signature = ethers.Signature.from(operatorSignedDigestHash).serialized;
-
-    console.log("Registering Operator to AVS Registry contract");
-
-
-    // Register Operator to AVS
-    // Per release here: https://github.com/Layr-Labs/eigenlayer-middleware/blob/v0.2.1-mainnet-rewards/src/unaudited/ECDSAStakeRegistry.sol#L49
-    const tx2 = await ecdsaRegistryContract.registerOperatorWithSignature(
-        operatorSignatureWithSaltAndExpiry,
-        wallet.address
-    );
-    await tx2.wait();
-    console.log("Operator registered on AVS successfully");
 };
 
 const monitorNewTasks = async () => {
@@ -237,8 +238,8 @@ const monitorNewTasks = async () => {
         console.log(`New task detected on ${new Date().toLocaleString()}: `,);
         let taskObj: Task = {
             rewardContractAddress: task[0],
-            appIds: Array.from(task[1]).map((n:any) => parseInt(n)),
-            fromBlockNum:  parseInt(task[2]),
+            appIds: Array.from(task[1]).map((n: any) => parseInt(n)),
+            fromBlockNum: parseInt(task[2]),
             toBlockNum: parseInt(task[3]),
             taskCreatedBlock: parseInt(task[4])
         }
@@ -250,8 +251,8 @@ const monitorNewTasks = async () => {
 };
 
 const main = async () => {
-    // Already Register
-    // await registerOperator();
+    // Register operator
+    await registerOperator();
     monitorNewTasks().catch((error) => {
         console.error("Error monitoring tasks:", error);
     });
