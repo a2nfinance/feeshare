@@ -11,7 +11,7 @@ import { Badge } from "../ui/badge"
 import { formatEther } from "viem"
 const abi = DAOJSON.abi;
 export const DAOInfo = ({ dao }: { dao: any }) => {
-    const { chainId } = useAccount()
+    const { address, chainId } = useAccount()
     const [statistic, setStatistic] = useState<{ proposalNum: number, programNum: number, appNum: number, fundingReqs: number }>({ proposalNum: 0, programNum: 0, appNum: 0, fundingReqs: 0 });
     const [loading, setLoading] = useState<boolean>(false)
     const { data: memberCount } = useReadContract({
@@ -173,8 +173,8 @@ export const DAOInfo = ({ dao }: { dao: any }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 space-x-2">
                     <FundTreasury dao_address={dao.dao_address} treasury_address={dao.treasury_address} />
-                    <Button variant={"secondary"}>Add Member</Button>
-                    <Button variant={"secondary"}>Add Token</Button>
+                    <Button variant={"secondary"} disabled={!address || (address !== dao.creator)}>Add Member</Button>
+                    <Button variant={"secondary"} disabled={!address || (address !== dao.creator)}>Add Token</Button>
 
                 </div>
             </CardContent>
