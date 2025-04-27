@@ -40,9 +40,8 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params
       });
 
       console.log('DAO Created TX:', tx);
-
-      // @ts-ignore
-      await waitForTransactionReceipt(config.getClient(chainId), {
+      //@ts-ignore
+      await waitForTransactionReceipt(config.getClient(chainId || 1924), {
         hash: tx,
       });
       setTxHash(tx);
