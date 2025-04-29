@@ -44,13 +44,13 @@ const TreasuryABI = TreasuryJSON.abi;
 const RewardABI = RewardJSON.abi;
 
 const proposalSchema = z.object({
-    name: z.string().min(1),
+    name: z.string().min(10),
     durationInDays: z.coerce.number().min(1),
     type: z.enum(['incentive', 'sendfund', "updateavscontract", "allowclaim"]),
 
     // Incentive fields
     title: z.string().optional(),
-    targetContract: z.string().optional(),
+    targetContract: z.string().nonempty(),
     startDate: z.coerce.number().optional(),
     endDate: z.coerce.number().optional(),
     rewardType: z.enum(["fixed", "dynamic"]),

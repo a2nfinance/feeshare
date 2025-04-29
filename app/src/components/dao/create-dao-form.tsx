@@ -22,9 +22,9 @@ import { Summary } from './Summary';
 const abi = DAOFactoryJSON.abi;
 const formSchema = z.object({
     daoName: z.string().min(3),
-    daoDescription: z.string().min(3),
-    daoXAccount: z.string(),
-    daoDiscordAccount: z.string(),
+    daoDescription: z.string().min(10),
+    daoXAccount: z.string().nonempty(),
+    daoDiscordAccount: z.string().nonempty(),
     daoQuorum: z.number().min(1),
     daoVotingThreshold: z.number().min(1),
     daoOnlyMembersCanPropose: z.boolean(),
@@ -57,11 +57,11 @@ export default function CreateDAOForm() {
             daoVotingThreshold: 50,
             daoOnlyMembersCanPropose: false,
             daoAllowEarlierExecution: true,
-            initialWhitelistedTokens: [''],
-            initialWhitelistedFunders: [''],
+            initialWhitelistedTokens: ['0x'],
+            initialWhitelistedFunders: ['0x'],
             members: [{ address: "", weight: 1 }]
         },
-        mode: "onChange"
+        mode: "onTouched"
     });
 
     const {
@@ -95,6 +95,14 @@ export default function CreateDAOForm() {
     });
 
     const [createDAOProcessing, setCreateDAOProcessing] = useState(false)
+
+
+    const updateStep = async () => {
+        const isValid = await form.trigger();
+        if (isValid ) {
+            setStep(step + 1);
+        }
+    }
 
     const onSubmit = async (data: FormData) => {
         try {
@@ -502,11 +510,11 @@ export default function CreateDAOForm() {
                             <div className="flex justify-between">
                                 {step > 0 ? <Button onClick={() => setStep(step - 1)} type="button">Back</Button> : <div />}
                                 {step < 4 ? (
-                                    <Button onClick={() => setStep(step + 1)} type="button">Continue</Button>
+                                    <Button onClick={() => updateStep()} type="button">Continue</Button>
                                 ) : (
-                                    <Button type="submit">
+                                    <Button type="submit" disabled={!chainId || !address}>
                                         {createDAOProcessing && <Loader2 className='animate-spin' />}
-                                        Create DAO
+                                        {address ? "Create DAO" : "Please Connect Wallet"}
                                     </Button>
                                 )}
                             </div>

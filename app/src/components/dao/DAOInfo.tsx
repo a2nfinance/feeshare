@@ -35,7 +35,6 @@ export const DAOInfo = ({ dao }: { dao: any }) => {
             .then(res => res.json())
             .then(data => {
                 setStatistic(data.statistic);
-                console.log(statistic);
                 setLoading(false);
             });
     }

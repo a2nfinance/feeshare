@@ -37,17 +37,17 @@ const DAOABI = DAOJSON.abi;
 const programABI = ProgramJSON.abi;
 
 const proposalSchema = z.object({
-    name: z.string(),
+    name: z.string().min(10),
     durationInDays: z.coerce.number().min(1),
     type: z.enum(['applyprogram']),
 
     // Incentive fields
-    applicationName: z.string(),
-    xAccount: z.string(),
-    website: z.string(),
-    beneficiaryApp: z.string(),
+    applicationName: z.string().nonempty(),
+    xAccount: z.string().nonempty(),
+    website: z.string().nonempty().url(),
+    beneficiaryApp: z.string().nonempty(),
     targetContract: z.string().optional(),
-    whitelistedAppContracts: z.string().array(),
+    whitelistedAppContracts: z.string().array().min(1, "The application needs at least one smart contract."),
 });
 
 type ProposalFormValues = z.infer<typeof proposalSchema>;
@@ -67,8 +67,9 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
             applicationName: "",
             xAccount: "",
             website: "",
-            whitelistedAppContracts: []
-        }
+            whitelistedAppContracts: ["0x"]
+        },
+        mode: "onChange"
     });
 
     const { fields, append, remove } = useFieldArray({
@@ -245,18 +246,21 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
                                     <FormControl><Input {...field} /></FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )} />
                             <FormField name="website" control={form.control} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Website</FormLabel>
                                     <FormControl><Input {...field} /></FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )} />
                             <FormField name="xAccount" control={form.control} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>X Account</FormLabel>
                                     <FormControl><Input {...field} /></FormControl>
+                                    <FormMessage />
                                 </FormItem>
                             )} />
 
@@ -304,7 +308,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                             />
                                         ))}
                                     </div>
-
+                                    <FormMessage />
                                     {/* Add new field button */}
                                     <Button
                                         type="button"
@@ -315,7 +319,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
                                         Add Contract
                                     </Button>
 
-                                    <FormMessage />
+                                    
                                 </FormItem>
                             )}
                         />
