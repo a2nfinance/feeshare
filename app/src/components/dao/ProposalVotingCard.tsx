@@ -37,7 +37,8 @@ export default function ProposalVotingCard({ fetchProposals, proposalDBId, param
         address: contractAddress,
         abi,
         functionName: "getVotingStatus",
-        args: [proposalId]
+        args: [proposalId],
+        chainId: chainId || 1924
     });
 
     const { writeContractAsync } = useWriteContract();

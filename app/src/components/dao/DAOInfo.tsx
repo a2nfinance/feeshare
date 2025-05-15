@@ -14,10 +14,11 @@ export const DAOInfo = ({ dao }: { dao: any }) => {
     const { address, chainId } = useAccount()
     const [statistic, setStatistic] = useState<{ proposalNum: number, programNum: number, appNum: number, fundingReqs: number }>({ proposalNum: 0, programNum: 0, appNum: 0, fundingReqs: 0 });
     const [loading, setLoading] = useState<boolean>(false)
-    const { data: memberCount } = useReadContract({
+    const {data: memberCount}: { data: any, refetch: any, isLoading: boolean, error: any } = useReadContract({
         address: dao.dao_address,
         abi,
         functionName: "getMemberCount",
+        chainId: chainId || 1924
     });
 
     const { data: balance } = useBalance({
