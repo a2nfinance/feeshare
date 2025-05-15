@@ -40,7 +40,7 @@ const fundSchema = z.object({
 type FundFormValues = z.infer<typeof fundSchema>;
 
 export function FundTreasury({ dao_address, treasury_address }: { dao_address: string, treasury_address: `0x${string}` }) {
-    const { chainId } = useAccount()
+    const { address, chainId } = useAccount()
     const [open, setOpen] = useState(false);
     const [fundProcessing, setFundProcessing] = useState(false)
     const { writeContractAsync } = useWriteContract();
@@ -106,7 +106,7 @@ export function FundTreasury({ dao_address, treasury_address }: { dao_address: s
     return (
         <Dialog open={open} onOpenChange={setOpen} modal={true}>
             <DialogTrigger asChild>
-                <Button>Fund Treasury</Button>
+                <Button disabled={!address}>Fund Treasury</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-sm">
                 <DialogHeader>
