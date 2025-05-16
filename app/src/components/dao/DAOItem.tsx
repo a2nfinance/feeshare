@@ -13,50 +13,45 @@ export const DAOItem = ({ dao }: any) => {
         <Card key={dao._id} className="hover:shadow-lg transition-shadow duration-300 ">
             <CardHeader>
                 <CardTitle>{dao.params.daoName}</CardTitle>
-                <CardDescription></CardDescription>
+                <CardDescription>{ dao.params.daoDescription}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
 
-                <Separator />
-                <div className="space-y-1">
-                    <h4>Description:</h4>
-                    <div className="text-sm text-gray-400">
-                        {
-                            dao.params.daoDescription
-                        }
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 space-y-2">
-                    <div className="space-y-1">
-                        <h4>X Account:</h4>
-                        <div className="text-sm text-gray-400">
-                            {
-                                dao.params.daoXAccount
-                            }
+                <Card className="md:col-span-1">
+                    <CardContent className="space-y-2 text-sm">
+                        <div className="grid grid-cols-2 space-y-2">
+                            <div className="space-y-1">
+                                <h4>X Account:</h4>
+                                <div className="text-sm text-gray-400">
+                                    {
+                                        dao.params.daoXAccount
+                                    }
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h4>Discord Account:</h4>
+                                <div className="text-sm text-gray-400">
+                                    {
+                                        dao.params.daoDiscordAccount
+                                    }
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h4>DAO Contract:</h4>
+                                <div className="text-sm text-gray-400">
+                                    <AddressDisplay address={dao.dao_address} />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <h4>Treasury Contract:</h4>
+                                <div className="text-sm text-gray-400">
+                                    <AddressDisplay address={dao.treasury_address} />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div className="space-y-1">
-                        <h4>Discord Account:</h4>
-                        <div className="text-sm text-gray-400">
-                            {
-                                dao.params.daoDiscordAccount
-                            }
-                        </div>
-                    </div>
-                    <div className="space-y-1">
-                        <h4>DAO Contract:</h4>
-                        <div className="text-sm text-gray-400">
-                            <AddressDisplay address={dao.dao_address} />
-                        </div>
-                    </div>
-                    <div className="space-y-1">
-                        <h4>Treasury Contract:</h4>
-                        <div className="text-sm text-gray-400">
-                            <AddressDisplay address={dao.treasury_address} />
-                        </div>
-                    </div>
-                </div>
-                <Separator />
+                    </CardContent>
+                </Card>
+
             </CardContent>
             <CardFooter>
                 <Button className="w-full" onClick={() => router.push(`/daos/${dao._id}`)}>

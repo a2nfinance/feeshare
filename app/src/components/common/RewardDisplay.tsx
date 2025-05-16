@@ -23,6 +23,7 @@ export const RewardDisplay = ({ rewardContractAddress, abi, onchainAppId, params
     abi: abi,
     functionName: 'rewardApp',
     args: [onchainAppId],
+    chainId: chainId || 1924
   })
 
   if (isLoading) return <Button className=""><Loader2 className='animate-spin' /></Button>

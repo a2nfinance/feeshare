@@ -52,10 +52,10 @@ export const WhitelistedApplication = ({ program }: { program: any }) => {
                                     <div className="grid grid-cols-1 mb-1.5 space-y-2">
 
 
-                                        <div className="space-y-1">
+                                        <div className="space-y-1 hover:cursor-pointer">
                                             <h4>Website:</h4>
                                             <div className="text-sm text-gray-400">
-                                                {app.params?.website}
+                                                <a onClick={() => window.open(app.params?.website, "_blank")}>{app.params?.website}</a>
                                             </div>
                                         </div>
 

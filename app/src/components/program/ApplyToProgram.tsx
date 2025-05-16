@@ -183,7 +183,7 @@ export function ApplyToProgram({ dao_address, program_address, reward_address, d
     return (
         <Dialog open={open} onOpenChange={setOpen} modal={true}>
             <DialogTrigger asChild>
-                <Button className='w-full'>Propose My Application</Button>
+                <Button className='w-full' disabled={!address}>Propose My Application</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-3xl">
                 <DialogHeader>
