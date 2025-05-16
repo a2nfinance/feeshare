@@ -14,80 +14,79 @@ export const SimpleProgramInfo = ({ programs }: { programs: any[] }) => {
                 programs.map((program: any, index: number) => {
                     return <Card key={`program-${index}`} className="md:col-span-1">
                         <CardHeader>
-                            <CardTitle>{program.title}</CardTitle>
+                            <CardTitle className="text-blue-400 font-semibold">{program.title}</CardTitle>
                             {/* <CardDescription>{dao.params.daoDescription}</CardDescription> */}
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
-                            <Separator />
-                            <div className="grid grid-cols-1 md:grid-cols-2 space-x-2 space-y-2">
+                            <Card className="md:col-span-1">
+                                <CardContent className="space-y-2 text-sm">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 space-x-2 space-y-2">
 
 
-                                <div className="space-y-1">
-                                    <h4>Reward Type:</h4>
-                                    <div className="text-sm text-gray-400">
-                                        {program.params?.rewardType}
-                                    </div>
-                                </div>
-
-                                {
-                                    program.params?.rewardType === "fixed" && <div className="space-y-1">
-                                        <h4>Reward Percentage:</h4>
-                                        <div className="text-sm text-gray-400">
-                                            {program.params?.fixedRewardPercentage}
+                                        <div className="space-y-1">
+                                            <h4>Reward Type:</h4>
+                                            <div className="text-sm text-gray-400">
+                                                {program.params?.rewardType}
+                                            </div>
                                         </div>
-                                    </div>
-                                }
 
-                                {
-                                    program.params?.rewardType === "dynamic" && <div className="space-y-1">
-                                        <h4>Reward Percentage:</h4>
-                                        <div className="text-sm text-gray-400">
-                                            {program.params?.rewardRules.toString()}
+                                        {
+                                            program.params?.rewardType === "fixed" && <div className="space-y-1">
+                                                <h4>Reward (%):</h4>
+                                                <div className="text-sm text-gray-400">
+                                                    {program.params?.fixedRewardPercentage}
+                                                </div>
+                                            </div>
+                                        }
+
+                                        {
+                                            program.params?.rewardType === "dynamic" && <div className="space-y-1">
+                                                <h4>Reward (%):</h4>
+                                                <div className="text-sm text-gray-400">
+                                                    {program.params?.rewardRules.toString()}
+                                                </div>
+                                            </div>
+                                        }
+
+                                        <div className="space-y-1">
+                                            <h4>From Date:</h4>
+                                            <div className="text-sm text-gray-400">
+                                                {new Date(program.params?.startDate).toLocaleString()}
+                                            </div>
                                         </div>
+
+
+                                        <div className="space-y-1">
+                                            <h4>To Date:</h4>
+                                            <div className="text-sm text-gray-400">
+                                                {new Date(program.params?.endDate).toLocaleString()}
+                                            </div>
+                                        </div>
+
+
+                                        <div className="space-y-1">
+                                            <h4>Program Contract:</h4>
+                                            <div className="text-sm text-gray-400">
+                                                <AddressDisplay address={program.program_address} />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <h4>Reward Contract:</h4>
+                                            <div className="text-sm text-gray-400">
+                                                <AddressDisplay address={program.reward_address} />
+                                            </div>
+                                        </div>
+
+
                                     </div>
-                                }
-
-                                <div className="space-y-1">
-                                    <h4>From Date:</h4>
-                                    <div className="text-sm text-gray-400">
-                                        {new Date(program.params?.startDate).toLocaleString()}
-                                    </div>
-                                </div>
-
-
-                                <div className="space-y-1">
-                                    <h4>To Date:</h4>
-                                    <div className="text-sm text-gray-400">
-                                        {new Date(program.params?.endDate).toLocaleString()}
-                                    </div>
-                                </div>
-
-
-                                <div className="space-y-1">
-                                    <h4>Program Contract:</h4>
-                                    <div className="text-sm text-gray-400">
-                                        <AddressDisplay address={program.program_address} />
-                                    </div>
-                                </div>
-                                <div className="space-y-1">
-                                    <h4>Reward Contract:</h4>
-                                    <div className="text-sm text-gray-400">
-                                        <AddressDisplay address={program.reward_address} />
-                                    </div>
-                                </div>
-
-
-                            </div>
-                            <Separator />
-
-
-
+                                </CardContent>
+                            </Card>
                         </CardContent>
                         <CardFooter>
-                        <Button className="w-full" onClick={() => router.push(`/programs/${program._id}`)}>
-                            View Details
-                        </Button>
-                    </CardFooter>
+                            <Button className="w-full" onClick={() => router.push(`/programs/${program._id}`)}>
+                                View Details
+                            </Button>
+                        </CardFooter>
                     </Card>
                 })
             }

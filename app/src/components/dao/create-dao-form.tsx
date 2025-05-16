@@ -222,7 +222,7 @@ export default function CreateDAOForm() {
                                         name="daoName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Organization Name</FormLabel>
+                                                <FormLabel>Organization</FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
